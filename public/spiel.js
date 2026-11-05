@@ -7,7 +7,6 @@
 
 /* ---------------------------------------------------------------- Grundlagen */
 const N = 36;                 // Kartengröße in Feldern
-const TW = 64, TH = 32;       // Feldgröße (isometrisch) in Weltpixeln
 const MAX_RH = 8;
 const SPEICHER = 'tv_stand';
 const $ = id => document.getElementById(id);
@@ -184,8 +183,8 @@ function einsammeln(b, leise) {
   const n = Math.min(m, platz);
   S[g.prod] += n;
   b.letzte = jetzt() - (m - n) / prodRate(b.lvl) * 3.6e6;
-  const [sx, sy] = iso(b.x + g.gr / 2, b.y + g.gr / 2);
-  schwebText(sx, sy - 40, '+' + fmt(n) + (g.prod === 'gold' ? ' 🪙' : ' 🪵'), g.prod === 'gold' ? '#ffe066' : '#ffcf9e');
+  schwebText(b.x + g.gr / 2, b.y + g.gr / 2, 2.4, '+' + fmt(n) + (g.prod === 'gold' ? ' 🪙' : ' 🪵'), g.prod === 'gold' ? '#ffe066' : '#ffcf9e');
+  effekt(b.x + g.gr / 2, b.y + g.gr / 2, 1.2, g.prod === 'gold' ? 'muenzen' : 'holz');
   ton('muenze'); merken();
   return true;
 }
@@ -267,249 +266,18 @@ function ton(art) {
   } catch (e) {}
 }
 
-/* ---------------------------------------------------------------- Kamera */
-const cv = $('welt'), ctx = cv.getContext('2d');
-let W = 0, H = 0, DPR = 1;
-const cam = { x: 0, y: 0, z: 1 };
-const iso = (x, y) => [(x - y) * TW / 2, (x + y) * TH / 2];
-function bild2feld(px, py) {
-  const wx = (px - cam.x) / cam.z, wy = (py - cam.y) / cam.z, a = wx / (TW / 2), b = wy / (TH / 2);
-  return [(a + b) / 2, (b - a) / 2];
-}
-function groesse() {
-  DPR = Math.min(2, window.devicePixelRatio || 1); W = innerWidth; H = innerHeight;
-  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
-  kameraBegrenzen();
-}
-function kameraZentrieren() {
-  // Im Kampf weiter raus, damit man den Rand zum Absetzen sieht
-  cam.z = modus === 'kampf'
-    ? clamp(Math.max(Math.min(W / (N * TW), H / (N * TH)) * 1.2, W / (24 * TW)), 0.3, 1.3)
-    : clamp(Math.max(Math.min(W / (N * TW), H / (N * TH)) * 1.5, W / (15 * TW)), 0.35, 1.3);
-  const [cx, cy] = iso(N / 2, N / 2);
-  cam.x = W / 2 - cx * cam.z; cam.y = H / 2 - cy * cam.z;
-}
-function kameraBegrenzen() {
-  const [cx, cy] = iso(N / 2, N / 2);
-  let sx = cx * cam.z + cam.x, sy = cy * cam.z + cam.y;
-  const rx = N * TW / 2 * cam.z, ry = N * TH / 2 * cam.z;
-  sx = clamp(sx, W / 2 - rx, W / 2 + rx); sy = clamp(sy, H / 2 - ry, H / 2 + ry);
-  cam.x = sx - cx * cam.z; cam.y = sy - cy * cam.z;
-}
-function zoomBei(f, px, py) {
-  const z2 = clamp(cam.z * f, 0.3, 2.4); f = z2 / cam.z;
-  cam.x = px - (px - cam.x) * f; cam.y = py - (py - cam.y) * f; cam.z = z2; kameraBegrenzen();
-}
-
-/* ---------------------------------------------------------------- Zeichenhilfen */
-const farbCache = new Map();
-function ton2(hex, f) {
-  const k = hex + f; let c = farbCache.get(k);
-  if (c) return c;
-  const n = parseInt(hex.slice(1), 16);
-  const r = clamp(Math.round((n >> 16 & 255) * f), 0, 255), g = clamp(Math.round((n >> 8 & 255) * f), 0, 255), b = clamp(Math.round((n & 255) * f), 0, 255);
-  c = `rgb(${r},${g},${b})`; farbCache.set(k, c); return c;
-}
-function poly(p) { ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); for (let i = 1; i < p.length; i++) ctx.lineTo(p[i][0], p[i][1]); ctx.closePath(); ctx.fill(); }
-function raute(x0, y0, x1, y1, farbe, z) {
-  z = z || 0; ctx.fillStyle = farbe;
-  const a = iso(x0, y0), b = iso(x1, y0), c = iso(x1, y1), d = iso(x0, y1);
-  poly([[a[0], a[1] - z], [b[0], b[1] - z], [c[0], c[1] - z], [d[0], d[1] - z]]);
-}
-function quader(x0, y0, x1, y1, z0, h, farbe, oben) {
-  const a = iso(x0, y0), b = iso(x1, y0), c = iso(x1, y1), d = iso(x0, y1), z1 = z0 + h;
-  ctx.fillStyle = ton2(farbe, 0.82); poly([[d[0], d[1] - z0], [c[0], c[1] - z0], [c[0], c[1] - z1], [d[0], d[1] - z1]]);
-  ctx.fillStyle = ton2(farbe, 0.64); poly([[c[0], c[1] - z0], [b[0], b[1] - z0], [b[0], b[1] - z1], [c[0], c[1] - z1]]);
-  ctx.fillStyle = oben || ton2(farbe, 1.08); poly([[a[0], a[1] - z1], [b[0], b[1] - z1], [c[0], c[1] - z1], [d[0], d[1] - z1]]);
-}
-function dachPyramide(x0, y0, x1, y1, z, hoehe, farbe) {
-  const a = iso(x0, y0), b = iso(x1, y0), c = iso(x1, y1), d = iso(x0, y1), m = iso((x0 + x1) / 2, (y0 + y1) / 2);
-  const A = [a[0], a[1] - z], B = [b[0], b[1] - z], C = [c[0], c[1] - z], D = [d[0], d[1] - z], M = [m[0], m[1] - z - hoehe];
-  ctx.fillStyle = ton2(farbe, 1.15); poly([A, B, M]); poly([D, A, M]);
-  ctx.fillStyle = ton2(farbe, 0.95); poly([D, C, M]);
-  ctx.fillStyle = ton2(farbe, 0.75); poly([C, B, M]);
-}
-const EMOJI_FONT = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif';
-const emojiCache = new Map();
-function emo(ch, x, y, groesse) {
-  const g = Math.round(groesse), k = ch + '|' + g;
-  let c = emojiCache.get(k);
-  if (!c) {
-    c = document.createElement('canvas'); const s = g * 2 + 8; c.width = c.height = s;
-    const k2 = c.getContext('2d'); k2.font = (g * 2) + 'px ' + EMOJI_FONT; k2.textAlign = 'center'; k2.textBaseline = 'middle';
-    k2.fillText(ch, s / 2, s / 2 + g * 0.12); emojiCache.set(k, c);
-  }
-  const s = c.width / 2;
-  ctx.drawImage(c, x - s / 2, y - s / 2, s, s);
-}
-function balken(x, y, w, anteil, farbe) {
-  ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillRect(x - w / 2 - 1, y - 1, w + 2, 6);
-  ctx.fillStyle = farbe; ctx.fillRect(x - w / 2, y, w * clamp(anteil, 0, 1), 4);
-}
-
-// Boden einmal vorzeichnen
-const RAND = 5;
-let boden = null;
-function bodenMalen() {
-  const breite = (N + RAND * 2) * TW, hoehe = (N + RAND * 2) * TH;
-  boden = document.createElement('canvas'); boden.width = breite; boden.height = hoehe;
-  const b = boden.getContext('2d');
-  const ox = breite / 2, oy = RAND * TH;   // Weltpunkt (0,0) im Bild
-  const r = mulberry(7);
-  b.fillStyle = '#2c6a26'; b.fillRect(0, 0, breite, hoehe);
-  const fliese = (x, y, farbe) => {
-    const [ax, ay] = iso(x, y), [bx, by] = iso(x + 1, y), [cx, cy] = iso(x + 1, y + 1), [dx, dy] = iso(x, y + 1);
-    b.fillStyle = farbe; b.beginPath(); b.moveTo(ox + ax, oy + ay); b.lineTo(ox + bx, oy + by); b.lineTo(ox + cx, oy + cy); b.lineTo(ox + dx, oy + dy); b.closePath(); b.fill();
-  };
-  for (let y = -RAND; y < N + RAND; y++) for (let x = -RAND; x < N + RAND; x++) {
-    const innen = x >= 0 && y >= 0 && x < N && y < N;
-    if (innen) fliese(x, y, (x + y) % 2 ? '#74c24f' : '#6cb948');
-    else fliese(x, y, (x + y) % 2 ? '#3f8a33' : '#3a8230');
-  }
-  // Rand des Spielfelds
-  b.strokeStyle = 'rgba(255,255,255,.35)'; b.lineWidth = 3; b.beginPath();
-  [[0, 0], [N, 0], [N, N], [0, N]].forEach((p, i) => { const [x, y] = iso(p[0], p[1]); i ? b.lineTo(ox + x, oy + y) : b.moveTo(ox + x, oy + y); });
-  b.closePath(); b.stroke();
-  // Bäume, Büsche und Steine außen herum
-  const baeume = [];
-  for (let i = 0; i < 520; i++) {
-    const x = -RAND + r() * (N + RAND * 2), y = -RAND + r() * (N + RAND * 2);
-    if (x > -0.6 && y > -0.6 && x < N + 0.6 && y < N + 0.6) continue;
-    baeume.push([x, y, r()]);
-  }
-  baeume.sort((p, q) => (p[0] + p[1]) - (q[0] + q[1]));
-  b.textAlign = 'center'; b.textBaseline = 'bottom';
-  for (const [x, y, z] of baeume) {
-    const [sx, sy] = iso(x, y);
-    const ch = z < 0.55 ? '🌲' : z < 0.8 ? '🌳' : z < 0.92 ? '🌿' : '🪨';
-    const gr = ch === '🌿' || ch === '🪨' ? 18 : 30 + z * 18;
-    b.fillStyle = 'rgba(0,0,0,.18)'; b.beginPath(); b.ellipse(ox + sx, oy + sy, gr * 0.45, gr * 0.2, 0, 0, Math.PI * 2); b.fill();
-    b.font = gr + 'px ' + EMOJI_FONT; b.fillText(ch, ox + sx, oy + sy + gr * 0.12);
-  }
-  // ein paar Blumen auf dem Feld
-  for (let i = 0; i < 70; i++) {
-    const [sx, sy] = iso(r() * N, r() * N);
-    b.fillStyle = ['#fff7a8', '#ffffff', '#ffb3d1', '#9be37d'][i % 4]; b.globalAlpha = 0.6;
-    b.beginPath(); b.arc(ox + sx, oy + sy, 2.2, 0, Math.PI * 2); b.fill(); b.globalAlpha = 1;
-  }
-  boden.ox = ox; boden.oy = oy;
-}
-
-/* ---------------------------------------------------------------- Gebäude zeichnen */
-const zeit0 = performance.now();
-function bauZeichnen(typ, x, y, lvl, z) {
-  const g = G[typ], s = g.gr;
-  if (z.tot) { truemmer(x, y, s, typ === 'mauer'); return; }
-  if (z.geist) ctx.globalAlpha = 0.8;
-  if (z.geist) raute(x, y, x + s, y + s, z.geist === 'ok' ? 'rgba(90,255,90,.55)' : 'rgba(255,60,60,.6)');
-  else if (typ !== 'mauer') raute(x + 0.05, y + 0.05, x + s - 0.05, y + s - 0.05, 'rgba(110,80,40,.32)');
-  const st = 1 + 0.05 * Math.max(0, lvl - 1);
-  if (typ === 'mauer') mauerZeichnen(x, y, lvl, z.nachbarn || 0);
-  else if (lvl < 1) {
-    quader(x + 0.3, y + 0.3, x + s - 0.3, y + s - 0.3, 0, 5, '#c8a06a');
-    const [mx, my] = iso(x + s / 2, y + s / 2); emo('🔨', mx, my - 18, 22);
-  } else if (typ === 'heerlager') {
-    raute(x + 0.25, y + 0.25, x + s - 0.25, y + s - 0.25, '#c9a46b');
-    const [mx, my] = iso(x + s / 2, y + s / 2);
-    const fl = 1 + Math.sin((performance.now() - zeit0) / 120) * 0.08;
-    emo('🔥', mx, my - 10, 20 * fl);
-    [[0.9, 0.9], [s - 0.9, 0.9], [0.9, s - 0.9], [s - 0.9, s - 0.9]].forEach(([dx, dy], i) => {
-      if (i >= Math.min(4, 1 + Math.ceil(lvl / 2))) return;
-      const [tx, ty] = iso(x + dx, y + dy); emo('⛺', tx, ty - 12, 24);
-    });
-  } else if (g.vert) {
-    const ins = typ === 'moerser' ? 0.4 : typ === 'schleuder' ? 0.35 : 0.6;
-    quader(x + ins, y + ins, x + s - ins, y + s - ins, 0, g.h * st, g.wand);
-    quader(x + ins - 0.15, y + ins - 0.15, x + s - ins + 0.15, y + s - ins + 0.15, g.h * st, 5, g.dach);
-    if (lvl >= 5) quader(x + ins - 0.15, y + ins - 0.15, x + s - ins + 0.15, y + s - ins + 0.15, g.h * st + 5, 1.5, '#f2c230');
-    const [mx, my] = iso(x + s / 2, y + s / 2);
-    emo(g.em, mx, my - g.h * st - 20, 30);
-  } else {
-    const ins = typ === 'rathaus' ? 0.35 : 0.3, hh = g.h * st, dh = 8 + s * 5;
-    quader(x + ins, y + ins, x + s - ins, y + s - ins, 0, hh, g.wand);
-    // Fenster/Tür auf der Vorderseite
-    const [tx, ty] = iso(x + s / 2, y + s - ins);
-    ctx.fillStyle = 'rgba(60,35,15,.85)'; ctx.fillRect(tx - 5, ty - Math.min(14, hh - 2), 10, Math.min(14, hh - 2));
-    dachPyramide(x + ins - 0.12, y + ins - 0.12, x + s - ins + 0.12, y + s - ins + 0.12, hh, dh, g.dach);
-    const [mx, my] = iso(x + s / 2, y + s / 2);
-    if (typ === 'rathaus') {
-      ctx.fillStyle = '#5b3a1e'; ctx.fillRect(mx - 1, my - hh - dh - 22, 2, 22);
-      ctx.fillStyle = lvl >= 5 ? '#f2c230' : '#3fae3a'; ctx.beginPath(); ctx.moveTo(mx + 1, my - hh - dh - 22); ctx.lineTo(mx + 15, my - hh - dh - 17); ctx.lineTo(mx + 1, my - hh - dh - 12); ctx.fill();
-      emo('🏛️', mx, my - hh * 0.45, 22);
-    } else emo(g.em, mx, my - hh - dh - 8, 24);
-  }
-  ctx.globalAlpha = 1;
-  const [mx, my] = iso(x + s / 2, y + s / 2), oben = my - (typ === 'mauer' ? 22 : g.h + 8 + s * 5 + 26);
-  if (z.bau != null) {
-    ctx.strokeStyle = '#7a4f23'; ctx.lineWidth = 2;
-    const a = iso(x + 0.2, y + s - 0.2), b2 = iso(x + s - 0.2, y + s - 0.2), c = iso(x + s - 0.2, y + 0.2);
-    ctx.beginPath(); for (const p of [a, b2, c]) { ctx.moveTo(p[0], p[1]); ctx.lineTo(p[0], p[1] - g.h - 10); } ctx.stroke();
-    emo('🔨', mx + 18, oben + 4, 16);
-    balken(mx, oben + 14, 44, z.bau, '#4fc3f7');
-  }
-  if (z.blase) {
-    const hop = Math.sin((performance.now() - zeit0) / 250) * 3;
-    ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.beginPath(); ctx.arc(mx, oben - 2 + hop, 13, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#8a5a2e'; ctx.lineWidth = 2; ctx.stroke();
-    emo(z.blase, mx, oben - 2 + hop, 16);
-  }
-  if (z.gewaehlt) {
-    ctx.strokeStyle = 'rgba(255,255,255,' + (0.6 + Math.sin((performance.now() - zeit0) / 180) * 0.3) + ')'; ctx.lineWidth = 2.5;
-    const a = iso(x, y), b2 = iso(x + s, y), c = iso(x + s, y + s), d = iso(x, y + s);
-    ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b2[0], b2[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); ctx.closePath(); ctx.stroke();
-  }
-  if (z.hp != null && z.hp < 1) balken(mx, oben + 4, typ === 'mauer' ? 20 : 40, z.hp, z.hp > 0.5 ? '#6fdc4f' : z.hp > 0.25 ? '#f6c343' : '#e2463b');
-}
-function mauerZeichnen(x, y, lvl, nb) {
-  const farbe = ['#a3a3a3', '#a3a3a3', '#8e9aa6', '#b38b5d', '#9c6b4a', '#d9c27a', '#6e7f8f', '#4d5763', '#e3b23c'][lvl - 1] || '#a3a3a3';
-  const h = 12 + lvl;
-  quader(x + 0.22, y + 0.22, x + 0.78, y + 0.78, 0, h, farbe);
-  if (nb & 1) quader(x + 0.78, y + 0.3, x + 1.22, y + 0.7, 0, h - 3, farbe);
-  if (nb & 2) quader(x + 0.3, y + 0.78, x + 0.7, y + 1.22, 0, h - 3, farbe);
-}
-function truemmer(x, y, s, klein) {
-  raute(x + 0.1, y + 0.1, x + s - 0.1, y + s - 0.1, 'rgba(60,45,30,.55)');
-  if (klein) { const [mx, my] = iso(x + 0.5, y + 0.5); ctx.fillStyle = '#7a7a7a'; ctx.fillRect(mx - 4, my - 3, 5, 3); ctx.fillRect(mx + 1, my - 1, 4, 3); return; }
-  const r = mulberry(x * 97 + y * 13);
-  for (let i = 0; i < 4 + s * 2; i++) {
-    const [px, py] = iso(x + 0.3 + r() * (s - 0.6), y + 0.3 + r() * (s - 0.6));
-    ctx.fillStyle = i % 2 ? '#6b5a48' : '#8a8a8a'; ctx.fillRect(px - 3, py - 4, 6 + r() * 4, 4 + r() * 3);
-  }
-}
+/* ---------------------------------------------------------------- Grafik (siehe grafik.js) */
+const cv = $('welt');
+let W = innerWidth, H = innerHeight;
+const bild2feld = (px, py) => TVG.bild2feld(px, py);
+function groesse() { W = innerWidth; H = innerHeight; TVG.groesse(); }
+function kameraZentrieren() { TVG.zentrieren(modus === 'kampf'); }
+function zoomBei(f, px, py) { TVG.zoomBei(f, px, py); }
+function effekt(x, y, h, art, gr) { TVG.effekt(x, y, h, art, gr || 1); }
+function schwebText(x, y, h, text, farbe) { TVG.text(x, y, h, text, farbe); }
 function mauerNachbarn(liste) {
   const m = new Set(); for (const b of liste) if (b.typ === 'mauer' && !b.tot) m.add(b.x + ',' + b.y);
   return b => (m.has((b.x + 1) + ',' + b.y) ? 1 : 0) | (m.has(b.x + ',' + (b.y + 1)) ? 2 : 0);
-}
-
-/* ---------------------------------------------------------------- Effekte */
-let texte = [], effekte = [];
-function schwebText(x, y, text, farbe) { texte.push({ x, y, text, farbe, t: 0 }); }
-function effekt(x, y, art, gr) { effekte.push({ x, y, art, gr: gr || 1, t: 0 }); }
-function effekteZeichnen(dt) {
-  for (const e of effekte) {
-    e.t += dt; const p = e.t / 0.5;
-    if (e.art === 'boom') {
-      ctx.globalAlpha = Math.max(0, 1 - p); ctx.fillStyle = '#ffb02e'; ctx.beginPath(); ctx.ellipse(e.x, e.y, 34 * e.gr * p + 6, 17 * e.gr * p + 3, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#fff3b0'; ctx.beginPath(); ctx.ellipse(e.x, e.y - 4, 18 * e.gr * p, 9 * e.gr * p, 0, 0, Math.PI * 2); ctx.fill();
-    } else if (e.art === 'staub') {
-      ctx.globalAlpha = Math.max(0, 0.8 - p * 0.8); ctx.fillStyle = '#c9b08a';
-      for (let i = 0; i < 5; i++) { const a = i * 1.26; ctx.beginPath(); ctx.arc(e.x + Math.cos(a) * 26 * p * e.gr, e.y - 10 - Math.sin(a) * 12 * p * e.gr - p * 16, 9 * e.gr * (1 - p * 0.4), 0, Math.PI * 2); ctx.fill(); }
-    } else if (e.art === 'treffer') {
-      ctx.globalAlpha = Math.max(0, 1 - p * 2); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(e.x, e.y, 3 + p * 10, 0, Math.PI * 2); ctx.fill();
-    } else if (e.art === 'setzen') {
-      ctx.globalAlpha = Math.max(0, 1 - p); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(e.x, e.y, 6 + p * 18, 3 + p * 9, 0, 0, Math.PI * 2); ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-  }
-  effekte = effekte.filter(e => e.t < 0.5);
-  ctx.textAlign = 'center'; ctx.font = '800 15px system-ui,sans-serif';
-  for (const t of texte) {
-    t.t += dt; ctx.globalAlpha = Math.max(0, 1 - t.t / 1.4);
-    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.strokeText(t.text, t.x, t.y - t.t * 30);
-    ctx.fillStyle = t.farbe; ctx.fillText(t.text, t.x, t.y - t.t * 30);
-  }
-  ctx.globalAlpha = 1;
-  texte = texte.filter(t => t.t < 1.4);
 }
 
 /* ---------------------------------------------------------------- Meldungen & Fenster */
@@ -636,7 +404,7 @@ function platzBestaetigen() {
   else if (z > 0) { b.start = jetzt(); b.ende = jetzt() + z * 1000; }
   else { b.lvl = 1; b.ziel = 0; }
   S.bauten.push(b); ton('bau'); merken();
-  const [sx, sy] = iso(b.x + G[typ].gr / 2, b.y + G[typ].gr / 2); effekt(sx, sy, 'staub', G[typ].gr / 3);
+  effekt(b.x + G[typ].gr / 2, b.y + G[typ].gr / 2, 0, 'staub', G[typ].gr / 3);
   // Mauern: gleich die nächste daneben anbieten
   if (typ === 'mauer' && anzahl('mauer') < maxAnzahl('mauer') && S.gold >= kosten('mauer', 1).n) {
     const occ = belegung(null), dirs = [[platz.dx || 1, platz.dy || 0], [1, 0], [0, 1], [-1, 0], [0, -1]];
@@ -912,7 +680,7 @@ function kampfStarten(art, info) {
         verfuegbar, eingesetzt: {}, auswahl: T_LISTE.find(t => verfuegbar[t] > 0) || null, geholt: { gold: 0, holz: 0 }, beute,
         sterne: 0, prozent: 0, rhTot: false, version: 0, tempo: 1, gesamt: bauten.filter(b => b.typ !== 'mauer').length, kaputt: 0,
         nachbarn: mauerNachbarn(bauten), mult: Math.pow(1.2, schmiedeLvl()) };
-  modus = 'kampf'; gewaehlt = null; platz = null; texte = []; effekte = [];
+  modus = 'kampf'; gewaehlt = null; platz = null;
   schliessen('fAngriff'); infoZeigen(); kameraZentrieren(); uiDorf(); kampfUi(true);
   $('kName').textContent = info.name;
   $('weiterKnopf').style.display = art === 'mehr' ? '' : 'none';
@@ -998,10 +766,10 @@ function setzeEinheit(t, fx, fy) {
   if (x < 0 || y < 0 || x >= N || y >= N || B.verbot[y * N + x]) { return 'rot'; }
   const d = T[t], m = B.mult;
   B.einheiten.push({ t, x: fx, y: fy, hp: d.hp * m, max: d.hp * m, schaden: d.schaden * m, cd: 0.2, ziel: null, mauer: null, pfad: null, pfadV: -1, pi: 0,
-    ox: (Math.random() - 0.5) * 0.3, oy: (Math.random() - 0.5) * 0.3, phase: Math.random() * 6, lauf: false, blick: 1 });
+    ox: (Math.random() - 0.5) * 0.3, oy: (Math.random() - 0.5) * 0.3, phase: Math.random() * 6, lauf: false, rx: 1, ry: 1 });
   B.verfuegbar[t]--; B.eingesetzt[t] = (B.eingesetzt[t] || 0) + 1;
   if (!B.laeuft) { B.laeuft = true; }
-  const [sx, sy] = iso(fx, fy); effekt(sx, sy, 'setzen'); ton('setzen');
+  effekt(fx, fy, 0, 'setzen'); ton('setzen');
   if (B.verfuegbar[t] <= 0) { const n = T_LISTE.find(k => B.verfuegbar[k] > 0); if (n) B.auswahl = n; }
   kampfUi();
   return true;
@@ -1089,10 +857,10 @@ function bauSchaden(b, n, quelle) {
   }
   if (b.hp <= 0) {
     b.hp = 0; b.tot = true; B.version++;
-    const [mx, my] = mitte(b), [sx, sy] = iso(mx, my);
-    effekt(sx, sy, 'staub', G[b.typ].gr / 2.5); ton('kaputt');
+    const [mx, my] = mitte(b);
+    effekt(mx, my, 0.3, 'staub', G[b.typ].gr / 2.2); ton('kaputt');
     const ges = b.beute.gold + b.beute.holz;
-    if (ges >= 1) schwebText(sx, sy - 30, (b.beute.gold >= 1 ? '+' + fmt(b.beute.gold) + '🪙 ' : '') + (b.beute.holz >= 1 ? '+' + fmt(b.beute.holz) + '🪵' : ''), '#ffe066');
+    if (ges >= 1) schwebText(mx, my, 1.8, (b.beute.gold >= 1 ? '+' + fmt(b.beute.gold) + '🪙 ' : '') + (b.beute.holz >= 1 ? '+' + fmt(b.beute.holz) + '🪵' : ''), '#ffe066');
     if (b.typ !== 'mauer') {
       B.kaputt++; B.prozent = B.kaputt / B.gesamt * 100;
       if (b.typ === 'rathaus') B.rhTot = true;
@@ -1119,9 +887,9 @@ function einheitAngriff(u, ziel) {
   const d = T[u.t];
   u.cd = d.takt;
   const [zx, zy] = naechsterPunkt(u.x, u.y, ziel);
-  u.blick = (zx - zy) - (u.x - u.y) >= 0 ? 1 : -1;
+  u.rx = zx - u.x; u.ry = zy - u.y; u.angriffT = performance.now();
   if (d.selbst) {
-    const [sx, sy] = iso(u.x, u.y); effekt(sx, sy, 'boom', 1.2); ton('boom');
+    effekt(u.x, u.y, 0.2, 'boom', 1.1); ton('boom');
     flaechenSchadenBau(zx, zy, d.flaeche, u.schaden, u);
     u.hp = 0; return;
   }
@@ -1132,14 +900,14 @@ function einheitAngriff(u, ziel) {
       treffer: () => { if (d.flaeche) flaechenSchadenBau(zx, zy, d.flaeche, n, u); else bauSchaden(ziel, n, u); } });
   } else {
     bauSchaden(ziel, n, u);
-    const [sx, sy] = iso(zx, zy); effekt(sx, sy - 10, 'treffer');
+    effekt(zx, zy, 0.6, 'treffer');
   }
 }
 function geheZu(u, tx, ty, dt) {
   const d = T[u.t], dx = tx - u.x, dy = ty - u.y, l = Math.hypot(dx, dy);
   if (l < 1e-4) return true;
   const sch = d.tempo * dt;
-  u.lauf = true; u.blick = (dx - dy) >= 0 ? 1 : -1;
+  u.lauf = true; u.rx = dx; u.ry = dy;
   if (sch >= l) { u.x = tx; u.y = ty; return true; }
   u.x += dx / l * sch; u.y += dy / l * sch; return false;
 }
@@ -1171,16 +939,17 @@ function vertSchritt(b, dt) {
   }
   if (!b.ziel) { b.cd = 0.1; return; }
   b.cd = v.takt;
+  b.winkel = Math.atan2(b.ziel.x - mx, b.ziel.y - my); b.feuerT = performance.now();
   const u = b.ziel, n = vertSchaden(b.typ, b.lvl), h = G[b.typ].h * (1 + 0.05 * (b.lvl - 1)) + 8;
   ton('schuss');
   if (v.art === 'bombe') {
     const tx = u.x, ty = u.y;
     B.geschosse.push({ von: [mx, my, h], nach: [tx, ty, 0], t: 0, dauer: 1.3, art: 'bombe', bogen: 90,
-      treffer: () => { const [sx, sy] = iso(tx, ty); effekt(sx, sy, 'boom', 1.3); ton('boom'); for (const e of B.einheiten) if (e.hp > 0 && !T[e.t].flug && Math.hypot(e.x - tx, e.y - ty) <= v.flaeche) e.hp -= n; } });
+      treffer: () => { effekt(tx, ty, 0.1, 'boom', 1.2); ton('boom'); for (const e of B.einheiten) if (e.hp > 0 && !T[e.t].flug && Math.hypot(e.x - tx, e.y - ty) <= v.flaeche) e.hp -= n; } });
   } else {
     const ziel = u;
     B.geschosse.push({ von: [mx, my, h], ziel, t: 0, dauer: Math.max(0.12, Math.hypot(u.x - mx, u.y - my) / (v.art === 'pfeil' ? 16 : v.art === 'wind' ? 12 : 11)), art: v.art,
-      treffer: () => { if (ziel.hp > 0) { ziel.hp -= n; const [sx, sy] = iso(ziel.x, ziel.y); effekt(sx, sy - (T[ziel.t].flug ? 34 : 8), 'treffer'); } } });
+      treffer: () => { if (ziel.hp > 0) { ziel.hp -= n; effekt(ziel.x, ziel.y, T[ziel.t].flug ? 1.9 : 0.6, 'treffer'); } } });
   }
 }
 function kampfSchritt(dt) {
@@ -1195,7 +964,7 @@ function kampfSchritt(dt) {
   B.geschosse = B.geschosse.filter(g => !g.fertig);
   for (const u of B.einheiten) if (u.hp <= 0 && !u.weg) {
     u.weg = true;
-    if (!T[u.t].selbst) { const [sx, sy] = iso(u.x, u.y); effekt(sx, sy - (T[u.t].flug ? 34 : 0), 'staub', 0.5); schwebText(sx, sy - 20, '💀', '#fff'); }
+    if (!T[u.t].selbst) { effekt(u.x, u.y, T[u.t].flug ? 1.7 : 0.2, 'staub', 0.45); schwebText(u.x, u.y, 1.2, '💀', '#fff'); }
   }
   B.einheiten = B.einheiten.filter(u => !u.weg);
   const nochDa = Object.values(B.verfuegbar).some(n => n > 0);
@@ -1237,87 +1006,42 @@ function kampfEnde() {
   $('heimKnopf').onclick = () => { ton('klick'); schliessen('fErgebnis'); B = null; modus = 'dorf'; kameraZentrieren(); uiDorf(); };
 }
 
-/* ---------------------------------------------------------------- Einheiten & Geschosse zeichnen */
-function einheitZeichnen(u, zeit) {
-  const d = T[u.t], [sx, sy] = iso(u.x + u.ox, u.y + u.oy);
-  const r = 8 + Math.sqrt(d.platz) * 2.6, hoch = d.flug ? 34 + Math.sin(zeit * 4 + u.phase) * 3 : 0;
-  const hop = u.lauf && !d.flug ? Math.abs(Math.sin(zeit * 12 + u.phase)) * 3 : 0;
-  ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(sx, sy, r * 0.9, r * 0.45, 0, 0, Math.PI * 2); ctx.fill();
-  const y = sy - hoch - hop - r * 0.7;
-  ctx.fillStyle = d.farbe; ctx.beginPath(); ctx.arc(sx, y, r, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#2b6bd6'; ctx.lineWidth = 2; ctx.stroke();
-  ctx.save(); ctx.translate(sx, y); ctx.scale(u.blick, 1); emo(d.em, 0, -1, r * 1.55); ctx.restore();
-  if (u.hp < u.max) balken(sx, y - r - 8, 18, u.hp / u.max, '#5fd0ff');
-}
-function geschossZeichnen(g) {
-  const p = clamp(g.t / g.dauer, 0, 1);
-  let nach = g.nach;
-  if (g.ziel) nach = [g.ziel.x, g.ziel.y, T[g.ziel.t].flug ? 34 : 8];
-  const x = g.von[0] + (nach[0] - g.von[0]) * p, y = g.von[1] + (nach[1] - g.von[1]) * p;
-  let z = g.von[2] + (nach[2] - g.von[2]) * p;
-  if (g.bogen) z += Math.sin(p * Math.PI) * g.bogen;
-  const [sx, sy] = iso(x, y);
-  if (g.art === 'pfeil') {
-    const [ex, ey] = iso(nach[0], nach[1]), a = Math.atan2((ey - nach[2]) - (sy - z), ex - sx);
-    ctx.strokeStyle = '#5b3a1e'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx - Math.cos(a) * 8, sy - z - Math.sin(a) * 8); ctx.lineTo(sx, sy - z); ctx.stroke();
-  } else if (g.art === 'wind') {
-    ctx.strokeStyle = 'rgba(220,240,255,.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(sx, sy - z, 6, p * 12, p * 12 + 4); ctx.stroke();
-  } else if (g.art === 'bombe') {
-    ctx.fillStyle = '#4a2f1a'; ctx.beginPath(); ctx.arc(sx, sy - z, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ffcc33'; ctx.beginPath(); ctx.arc(sx + 3, sy - z - 5, 2, 0, Math.PI * 2); ctx.fill();
-  } else if (g.art === 'feuer') {
-    ctx.fillStyle = '#ff8c1a'; ctx.beginPath(); ctx.arc(sx, sy - z, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ffe066'; ctx.beginPath(); ctx.arc(sx, sy - z, 2.5, 0, Math.PI * 2); ctx.fill();
-  } else {
-    ctx.fillStyle = g.art === 'stein' ? '#777' : '#ddd'; ctx.beginPath(); ctx.arc(sx, sy - z, g.art === 'stein' ? 4.5 : 3, 0, Math.PI * 2); ctx.fill();
-  }
-}
-
-/* ---------------------------------------------------------------- Hauptzeichnen */
+/* ---------------------------------------------------------------- Szene an die Grafik geben */
 function zeichnen(dt) {
-  const zeit = (performance.now() - zeit0) / 1000;
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  ctx.fillStyle = '#2c6a26'; ctx.fillRect(0, 0, W, H);
-  ctx.setTransform(DPR * cam.z, 0, 0, DPR * cam.z, DPR * cam.x, DPR * cam.y);
-  ctx.imageSmoothingEnabled = true;
-  ctx.drawImage(boden, -boden.ox, -boden.oy);
-  const liste = [];
+  const sz = { bauten: [], einheiten: [], geschosse: [], verbot: null, lager: null };
+  const jetztMs = performance.now();
   if (modus === 'kampf' && B) {
-    if (B.auswahl && !B.vorbei && B.verfuegbar[B.auswahl] > 0) {
-      ctx.fillStyle = 'rgba(255,40,40,.16)'; ctx.beginPath();
-      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (B.verbot[y * N + x]) {
-        const a = iso(x, y), b = iso(x + 1, y), c = iso(x + 1, y + 1), d = iso(x, y + 1);
-        ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); ctx.closePath();
-      }
-      ctx.fill();
+    if (B.auswahl && !B.vorbei && B.verfuegbar[B.auswahl] > 0) sz.verbot = B.verbot;
+    for (const b of B.bauten) sz.bauten.push({ key: b, typ: b.typ, gr: G[b.typ].gr, x: b.x, y: b.y, lvl: b.lvl, team: 'gegner', tot: b.tot, hp: b.hp / b.max,
+      nachbarn: b.typ === 'mauer' ? B.nachbarn(b) : 0, winkel: b.winkel, feuer: b.feuerT ? jetztMs - b.feuerT : null });
+    for (const u of B.einheiten) sz.einheiten.push({ key: u, t: u.t, x: u.x + u.ox, y: u.y + u.oy, flug: !!T[u.t].flug, hp: u.hp, max: u.max, lauf: u.lauf,
+      rx: u.rx, ry: u.ry, angriff: u.angriffT ? jetztMs - u.angriffT : null, phase: u.phase });
+    for (const g of B.geschosse) {
+      const p = clamp(g.t / g.dauer, 0, 1);
+      const nach = g.ziel ? [g.ziel.x, g.ziel.y, T[g.ziel.t].flug ? 34 : 14] : g.nach;
+      let z = g.von[2] + (nach[2] - g.von[2]) * p;
+      if (g.bogen) z += Math.sin(p * Math.PI) * g.bogen;
+      sz.geschosse.push({ key: g, art: g.art, x: g.von[0] + (nach[0] - g.von[0]) * p, y: g.von[1] + (nach[1] - g.von[1]) * p, h: z / 22 });
     }
-    for (const b of B.bauten) {
-      const s = G[b.typ].gr;
-      liste.push({ k: b.tot ? -1000 + b.x + b.y : b.x + b.y + s, f: () => bauZeichnen(b.typ, b.x, b.y, b.lvl, { tot: b.tot, hp: b.hp / b.max, nachbarn: b.typ === 'mauer' ? B.nachbarn(b) : 0 }) });
-    }
-    for (const u of B.einheiten) liste.push({ k: u.x + u.y + (T[u.t].flug ? 4 : 0.2), f: () => einheitZeichnen(u, zeit) });
   } else {
     const nb = mauerNachbarn(S.bauten), t = jetzt();
     for (const b of S.bauten) {
-      const s = G[b.typ].gr;
       const gezogen = zieh && zieh.b === b;
-      const x = gezogen ? zieh.x : b.x, y = gezogen ? zieh.y : b.y;
       let blase = null;
       if (G[b.typ].prod && b.lvl >= 1 && menge(b) >= Math.max(10, prodKap(b.lvl) * 0.04)) blase = G[b.typ].prod === 'gold' ? '🪙' : '🪵';
       if (b.typ === 'kaserne' && S.schlange.length) blase = T[S.schlange[0]].em;
-      liste.push({ k: x + y + s, f: () => bauZeichnen(b.typ, x, y, b.lvl, {
-        bau: b.ende ? clamp((t - b.start) / (b.ende - b.start), 0, 1) : null, blase, gewaehlt: gewaehlt === b && !gezogen,
-        geist: gezogen ? (frei(b.typ, x, y, b) ? 'ok' : 'nein') : null, nachbarn: b.typ === 'mauer' ? nb(b) : 0 }) });
+      sz.bauten.push({ key: b, typ: b.typ, gr: G[b.typ].gr, x: gezogen ? zieh.x : b.x, y: gezogen ? zieh.y : b.y, lvl: b.lvl, team: 'spieler',
+        bau: b.ende ? clamp((t - b.start) / (b.ende - b.start), 0, 1) : null, rest: b.ende ? dauerText((b.ende - t) / 1000) : '',
+        blase, gewaehlt: gewaehlt === b && !gezogen, geist: gezogen ? (frei(b.typ, zieh.x, zieh.y, b) ? 'ok' : 'nein') : null,
+        nachbarn: b.typ === 'mauer' ? nb(b) : 0 });
     }
-    if (platz) {
-      const s = G[platz.typ].gr;
-      liste.push({ k: platz.x + platz.y + s + 0.01, f: () => bauZeichnen(platz.typ, platz.x, platz.y, 1, { geist: frei(platz.typ, platz.x, platz.y, null) ? 'ok' : 'nein' }) });
-    }
+    if (platz) sz.bauten.push({ key: 'platz:' + platz.typ, typ: platz.typ, gr: G[platz.typ].gr, x: platz.x, y: platz.y, lvl: 1, team: 'spieler',
+      geist: frei(platz.typ, platz.x, platz.y, null) ? 'ok' : 'nein' });
+    sz.lager = [];
+    for (const t2 of T_LISTE) for (let i = 0; i < Math.min(S.armee[t2] || 0, 12); i++) sz.lager.push(t2);
+    sz.lager = sz.lager.slice(0, 40);
   }
-  liste.sort((a, b) => a.k - b.k);
-  for (const e of liste) e.f();
-  if (B && modus === 'kampf') for (const g of B.geschosse) geschossZeichnen(g);
-  effekteZeichnen(dt);
+  TVG.render(sz, dt);
 }
 
 /* ---------------------------------------------------------------- Eingabe */
@@ -1394,9 +1118,9 @@ cv.addEventListener('pointermove', e => {
     if (zeiger.size < 2) return;
     const [a, b] = [...zeiger.values()];
     const d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-    cam.x += mx - geste.mx; cam.y += my - geste.my;
+    TVG.pan(mx - geste.mx, my - geste.my);
     if (geste.d > 0) zoomBei(d / geste.d, mx, my);
-    geste.d = d; geste.mx = mx; geste.my = my; kameraBegrenzen(); return;
+    geste.d = d; geste.mx = mx; geste.my = my; return;
   }
   if (halten) { halten.x = e.clientX; halten.y = e.clientY; }
   if (!geste.bewegt && Math.hypot(e.clientX - geste.sx, e.clientY - geste.sy) > 9) {
@@ -1405,7 +1129,7 @@ cv.addEventListener('pointermove', e => {
   }
   if (geste.bewegt) {
     if (halten && halten.n > 0) { /* weiter setzen während Ziehen */ }
-    else if (!ziehen(geste, e)) { cam.x += e.clientX - geste.lx; cam.y += e.clientY - geste.ly; kameraBegrenzen(); }
+    else if (!ziehen(geste, e)) TVG.pan(e.clientX - geste.lx, e.clientY - geste.ly);
   }
   geste.lx = e.clientX; geste.ly = e.clientY;
 });
@@ -1443,16 +1167,18 @@ window.SLRangAdapter = () => {
 
 /* ---------------------------------------------------------------- Start & Schleife */
 laden();
-groesse(); bodenMalen(); kameraZentrieren();
+TVG.init(cv, N); groesse(); kameraZentrieren();
 // Offline-Fortschritt anwenden
 dorfTakt(); uiDorf();
 if (!S.hilfe) willkommen();
 let letzte = performance.now(), uiTakt = 0;
 function schleife(t) {
-  const dt = Math.min(0.05, (t - letzte) / 1000); letzte = t;
+  const echt = Math.min(0.25, (t - letzte) / 1000); letzte = t;
+  const dt = Math.min(0.05, echt);
   if (modus === 'kampf' && B) {
-    const schritte = B.tempo;
-    for (let i = 0; i < schritte; i++) kampfSchritt(dt);
+    // Feste Teilschritte, damit der Kampf auch bei wenigen Bildern pro Sekunde gleich schnell läuft
+    let rest = echt * B.tempo;
+    while (rest > 1e-4 && B && !B.vorbei) { const s = Math.min(0.05, rest); kampfSchritt(s); rest -= s; }
   }
   uiTakt += dt;
   if (uiTakt > 0.25) {

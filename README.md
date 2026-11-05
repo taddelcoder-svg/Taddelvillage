@@ -4,7 +4,9 @@ Aufbau-Strategie im Browser: Dorf bauen, Rohstoffe sammeln, Armee ausbilden und 
 Teil der Swimming-Lions-Spielesammlung.
 
 ## Inhalt
-- **Dorf** auf einem 36×36-Feld in Iso-Ansicht: 13 Gebäudearten (Rathaus bis Stufe 8, Goldminen, Sägewerke, Lager,
+- **3D-Grafik** mit Three.js (liegt unter `public/vendor/`, MIT-Lizenz): alle Gebäude und Truppen aus Low-Poly-Formen gebaut,
+  mit Licht, weichen Schatten, Partikeln und Animationen (drehende Türme, Sägeblatt, Lagerfeuer, Rauch, Explosionen).
+- **Dorf** auf einem 36×36-Feld: 13 Gebäudearten (Rathaus bis Stufe 8, Goldminen, Sägewerke, Lager,
   Baumeisterhütten, Kaserne, Heerlager, Schmiede, Steinschleuder, Bogenturm, Donnerfass, Windturm, Mauern).
 - **Zwei Rohstoffe** (Gold 🪙 und Holz 🪵), Bauzeiten mit Baumeistern, Fortschritt läuft auch offline weiter.
 - **6 Truppen**: Raufbold, Schleuderin, Plünder-Waschbär, Sprengmaulwurf, Steintroll, Greif – jede mit eigener Zielwahl.
