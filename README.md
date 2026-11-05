@@ -6,10 +6,12 @@ Teil der Swimming-Lions-Spielesammlung.
 ## Inhalt
 - **3D-Grafik** mit Three.js (liegt unter `public/vendor/`, MIT-Lizenz): alle Gebäude und Truppen aus Low-Poly-Formen gebaut,
   mit Licht, weichen Schatten, Partikeln und Animationen (drehende Türme, Sägeblatt, Lagerfeuer, Rauch, Explosionen).
-- **Dorf** auf einem 36×36-Feld: 13 Gebäudearten (Rathaus bis Stufe 8, Goldminen, Sägewerke, Lager,
-  Baumeisterhütten, Kaserne, Heerlager, Schmiede, Steinschleuder, Bogenturm, Donnerfass, Windturm, Mauern).
+- **Dorf** auf einem 36×36-Feld: Rathaus bis Stufe 8, Goldminen, Sägewerke, Lager, Baumeisterhütten, Markt (Gold ↔ Holz),
+  Kaserne, Heerlager, Schmiede, Heldenhalle, Steinschleuder, Bogenturm, Donnerfass, Windturm, Glutturm, Balliste,
+  versteckte Stachelfallen, Mauern – dazu Deko (Brunnen, Goldlöwe, Blumenbeete, Bäume, Fahnenmasten).
 - **Zwei Rohstoffe** (Gold 🪙 und Holz 🪵), Bauzeiten mit Baumeistern, Fortschritt läuft auch offline weiter.
-- **6 Truppen**: Raufbold, Schleuderin, Plünder-Waschbär, Sprengmaulwurf, Steintroll, Greif – jede mit eigener Zielwahl.
+- **7 Truppen**: Raufbold, Schleuderin, Plünder-Waschbär, Sprengmaulwurf, Steintroll, Greif, Kräuterhexe (heilt) –
+  jede mit eigener Zielwahl. Dazu der **Löwenhauptmann** als Held aus der Heldenhalle.
 - **Angriffe**: 16 Kampagnen-Dörfer mit Sternen und endlose zufällige Räuberdörfer um Trophäen 🏆.
   Truppen laufen per Wegsuche um Gebäude herum und brechen durch Mauern.
 - Läuft am Handy (Touch, Zwei-Finger-Zoom, Halten = mehrere Truppen setzen) und am PC (Maus, Mausrad, Tasten 1–6 im Kampf).

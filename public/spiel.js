@@ -39,7 +39,7 @@ const G = {
                 text: 'Lagert Holz. Mehr Stufen = mehr Platz.' },
   baumeister: { name: 'Baumeisterhütte', em: '👷', gr: 2, kat: 'wirtschaft', res: 'gold', basis: 0, maxLvl: 1, hp: 250, h: 14, wand: '#c49a6c', dach: '#3d7bd9',
                 text: 'Jede Hütte bringt einen Baumeister. Mehr Baumeister = mehr gleichzeitige Baustellen.' },
-  kaserne:    { name: 'Kaserne', em: '🎖️', gr: 3, kat: 'armee', res: 'holz', basis: 200, maxLvl: 6, hp: 550, h: 22, wand: '#9a7b5a', dach: '#8e2f2f',
+  kaserne:    { name: 'Kaserne', em: '🎖️', gr: 3, kat: 'armee', res: 'holz', basis: 200, maxLvl: 7, hp: 550, h: 22, wand: '#9a7b5a', dach: '#8e2f2f',
                 text: 'Bildet Truppen aus. Jede Stufe schaltet eine neue Truppe frei.' },
   heerlager:  { name: 'Heerlager', em: '⛺', gr: 4, kat: 'armee', res: 'holz', basis: 250, maxLvl: 8, hp: 400, h: 6, wand: '#b08a55', dach: '#c76b2a',
                 text: 'Hier wartet deine Armee. Jede Stufe bringt 5 Plätze mehr.' },
@@ -54,6 +54,21 @@ const G = {
                 text: 'Wirft explodierende Fässer: Flächenschaden, aber ein toter Winkel ganz nah dran.' },
   windturm:   { name: 'Windturm', em: '🌪️', gr: 3, kat: 'verteidigung', res: 'gold', basis: 6000, maxLvl: 8, hp: 800, h: 42, wand: '#a9c1d3', dach: '#4a6fa5',
                 vert: { reich: 10, schaden: 90, takt: 1.0, boden: false, luft: true, art: 'wind' }, text: 'Holt Flieger mit heftigen Böen vom Himmel.' },
+  glutturm:   { name: 'Glutturm', em: '🔥', gr: 3, kat: 'verteidigung', res: 'gold', basis: 9000, maxLvl: 7, hp: 650, h: 34, wand: '#7a6a5a', dach: '#c0392b',
+                vert: { reich: 7.5, schaden: 32, takt: 1.6, boden: true, luft: true, art: 'glut', flaeche: 1.1 }, text: 'Schleudert Glutbälle mit Flächenschaden auf Boden- und Lufttruppen.' },
+  balliste:   { name: 'Balliste', em: '🎯', gr: 3, kat: 'verteidigung', res: 'gold', basis: 14000, maxLvl: 6, hp: 900, h: 20, wand: '#8a8f94', dach: '#5a3a1d',
+                vert: { reich: 13, schaden: 75, takt: 3.0, boden: true, luft: false, art: 'bolzen' }, text: 'Riesige Armbrust mit enormer Reichweite. Langsam, aber ein Treffer sitzt.' },
+  falle:      { name: 'Stachelfalle', em: '💣', gr: 1, kat: 'verteidigung', res: 'gold', basis: 400, maxLvl: 5, hp: 1, h: 2, wand: '#555', dach: '#555', falle: { schaden: 70, flaeche: 1.6 },
+                text: 'Versteckt im Gras. Explodiert, wenn Bodentruppen drauftreten.' },
+  markt:      { name: 'Markt', em: '⚖️', gr: 3, kat: 'wirtschaft', res: 'holz', basis: 1200, maxLvl: 1, hp: 500, h: 16, wand: '#b07a45', dach: '#d9442f',
+                text: 'Tausche Gold gegen Holz und umgekehrt (mit kleinem Händleraufschlag).' },
+  heldenhalle:{ name: 'Heldenhalle', em: '🦁', gr: 3, kat: 'armee', res: 'gold', basis: 5000, maxLvl: 8, hp: 900, h: 20, wand: '#d8d2c4', dach: '#3d5a9e',
+                text: 'Heimat des Löwenhauptmanns. Er kämpft bei jedem Angriff gratis mit. Wird er ausgebaut, bleibt er zu Hause.' },
+  brunnen:    { name: 'Brunnen', em: '⛲', gr: 2, kat: 'deko', res: 'gold', basis: 1500, maxLvl: 1, hp: 1, h: 10, wand: '#aaa', dach: '#aaa', deko: true, text: 'Plätschert hübsch vor sich hin.' },
+  statue:     { name: 'Goldlöwe', em: '🗿', gr: 2, kat: 'deko', res: 'gold', basis: 6000, maxLvl: 1, hp: 1, h: 10, wand: '#aaa', dach: '#aaa', deko: true, text: 'Ein goldener Löwe für die Ehre des Dorfes.' },
+  blumen:     { name: 'Blumenbeet', em: '🌷', gr: 1, kat: 'deko', res: 'gold', basis: 100, maxLvl: 1, hp: 1, h: 2, wand: '#aaa', dach: '#aaa', deko: true, text: 'Bunte Blumen.' },
+  baum:       { name: 'Baum', em: '🌳', gr: 1, kat: 'deko', res: 'gold', basis: 150, maxLvl: 1, hp: 1, h: 2, wand: '#aaa', dach: '#aaa', deko: true, text: 'Schatten für die Baumeister.' },
+  fahnenmast: { name: 'Fahnenmast', em: '🚩', gr: 1, kat: 'deko', res: 'gold', basis: 400, maxLvl: 1, hp: 1, h: 2, wand: '#aaa', dach: '#aaa', deko: true, text: 'Zeigt, wem das Dorf gehört.' },
   mauer:      { name: 'Mauer', em: '🧱', gr: 1, kat: 'verteidigung', res: 'gold', basis: 50, maxLvl: 9, hp: 350, h: 13, wand: '#a3a3a3', dach: '#c7c7c7',
                 text: 'Hält Bodentruppen auf. Sprengmaulwürfe hassen sie.' },
 };
@@ -71,6 +86,16 @@ const ANZAHL = {
   moerser: [0, 0, 1, 1, 2, 2, 3, 3],
   windturm: [0, 0, 0, 1, 1, 2, 2, 3],
   mauer: [25, 50, 75, 100, 125, 150, 175, 200],
+  glutturm: [0, 0, 0, 0, 1, 1, 2, 2],
+  balliste: [0, 0, 0, 0, 0, 1, 2, 2],
+  falle: [0, 1, 2, 3, 4, 5, 6, 6],
+  markt: [0, 1, 1, 1, 1, 1, 1, 1],
+  heldenhalle: [0, 0, 1, 1, 1, 1, 1, 1],
+  brunnen: [1, 1, 2, 2, 2, 3, 3, 3],
+  statue: [0, 1, 1, 1, 2, 2, 2, 2],
+  blumen: [6, 8, 10, 12, 14, 16, 18, 20],
+  baum: [6, 8, 10, 12, 14, 16, 18, 20],
+  fahnenmast: [2, 2, 3, 3, 4, 4, 5, 5],
 };
 const HUETTE_KOSTEN = [0, 500, 2000, 6000, 15000];
 const BAUZEIT = [10, 40, 120, 300, 720, 1500, 2700, 4200, 6000];
@@ -82,6 +107,7 @@ function maxLvl(typ, rh) {
   const g = G[typ];
   if (typ === 'rathaus') return MAX_RH;
   if (typ === 'schmiede') return clamp(rh - 2, 1, g.maxLvl);
+  if (typ === 'heldenhalle') return clamp(rh - 2, 1, g.maxLvl);
   return Math.min(g.maxLvl, rh + 1);
 }
 function kosten(typ, lvl) {
@@ -90,7 +116,7 @@ function kosten(typ, lvl) {
   return { res: G[typ].res, n: Math.round(G[typ].basis * Math.pow(1.9, lvl - 1) / 5) * 5 };
 }
 function bauzeit(typ, lvl) {
-  if (typ === 'mauer') return 0;
+  if (typ === 'mauer' || G[typ].deko) return 0;
   if (typ === 'baumeister') return 10;
   return BAUZEIT[lvl - 1] * (typ === 'rathaus' ? 1.5 : 1);
 }
@@ -114,8 +140,14 @@ const T = {
                  text: 'Ein Felsbrocken auf Beinen. Geht nur auf Verteidigungen los.' },
   greif:       { kurz: 'Greif', name: 'Greif', em: '🦅', platz: 6, kosten: 500, zeit: 28, hp: 400, schaden: 52, takt: 1.6, reich: 2.4, tempo: 1.7, ziel: 'alle', flug: true, flaeche: 0.9, kas: 6, farbe: '#c9a227', fern: true,
                  text: 'Fliegt über Mauern und trifft mehrere Gebäude auf einmal.' },
+  hexe:        { kurz: 'Hexe', name: 'Kräuterhexe', em: '🧙', platz: 4, kosten: 400, zeit: 24, hp: 160, schaden: 0, heilung: 26, takt: 1, reich: 2.6, tempo: 1.5, ziel: 'heilen', kas: 7, farbe: '#4e9a5a', heiler: true,
+                 text: 'Heilt alle Bodentruppen in ihrer Nähe. Greift selbst nicht an.' },
+  held:        { kurz: 'Held', name: 'Löwenhauptmann', em: '🦁', platz: 0, kosten: 0, zeit: 0, hp: 700, schaden: 55, takt: 1.1, reich: 0.8, tempo: 1.5, ziel: 'alle', kas: 99, farbe: '#d4a017', held: true,
+                 text: 'Dein Held. Kämpft bei jedem Angriff mit, wird mit der Heldenhalle stärker.' },
 };
 const T_LISTE = Object.keys(T);
+const TRUPPEN = T_LISTE.filter(t => !T[t].held);
+const heldenLvl = () => { const h = S.bauten.find(b => b.typ === 'heldenhalle'); return h && h.lvl >= 1 && !h.ende ? h.lvl : 0; };
 
 /* ---------------------------------------------------------------- Spielstand */
 let S = null;
@@ -323,12 +355,14 @@ function infoZeigen() {
   let h = `<h3>${g.em} ${esc(g.name)} <span class="kleintext">Stufe ${b.lvl}${b.ende ? ' → ' + b.ziel : ''}</span></h3><p>${esc(g.text)}</p>`;
   const lv = Math.max(1, b.lvl);
   const werte = [];
-  werte.push('❤️ ' + fmt(lebenVon(b.typ, lv)));
+  if (!g.deko && !g.falle) werte.push('❤️ ' + fmt(lebenVon(b.typ, lv)));
   if (g.prod) werte.push(resEm(g.prod) + ' ' + fmt(prodRate(lv)) + '/h · fasst ' + fmt(prodKap(lv)));
   if (g.lager) werte.push('Lager ' + fmt(LAGER_KAP[lv - 1]) + ' ' + resEm(g.lager));
   if (b.typ === 'rathaus') werte.push('Lager je ' + fmt(RH_KAP[lv - 1]));
   if (b.typ === 'heerlager') werte.push('👥 ' + lagerPlatz(lv) + ' Plätze');
-  if (b.typ === 'kaserne') werte.push('Truppen: ' + T_LISTE.filter(t => T[t].kas <= lv).map(t => T[t].em).join(' '));
+  if (b.typ === 'heldenhalle') werte.push('🦁 ❤️ ' + Math.round(T.held.hp * Math.pow(1.2, lv - 1)) + ' · ⚔️ ' + Math.round(T.held.schaden * Math.pow(1.2, lv - 1)));
+  if (g.falle) werte.push('💥 ' + Math.round(g.falle.schaden * Math.pow(1.25, lv - 1)) + ' Flächenschaden');
+  if (b.typ === 'kaserne') werte.push('Truppen: ' + TRUPPEN.filter(t => T[t].kas <= lv).map(t => T[t].em).join(' '));
   if (b.typ === 'schmiede') werte.push('Truppen +' + Math.round((Math.pow(1.2, lv) - 1) * 100) + ' %');
   if (g.vert) werte.push('⚔️ ' + vertSchaden(b.typ, lv).toFixed(0) + ' · Reichweite ' + g.vert.reich + ' · ' + (g.vert.boden && g.vert.luft ? 'Boden + Luft' : g.vert.luft ? 'nur Luft' : 'nur Boden'));
   h += `<p>${werte.join(' &nbsp;·&nbsp; ')}</p><div class="zeile">`;
@@ -346,6 +380,10 @@ function infoZeigen() {
     h += `<button class="knopf gruen" id="iAus">⬆️ Stufe ${b.lvl + 1}: <span class="${S[k.res] < k.n ? 'zu-teuer' : ''}">${fmt(k.n)} ${resEm(k.res)}</span> · ${dauerText(bauzeit(b.typ, b.lvl + 1))}</button>`;
     if (b.typ === 'mauer') h += `<button class="knopf" id="iAlle">🧱 Alle Stufe-${b.lvl}-Mauern</button>`;
   }
+  if (b.typ === 'markt' && b.lvl >= 1) {
+    const n = marktMenge();
+    h += `<button class="knopf" id="iG2H">${fmt(n)} 🪙 → ${fmt(n * 0.8)} 🪵</button><button class="knopf" id="iH2G">${fmt(n)} 🪵 → ${fmt(n * 0.8)} 🪙</button>`;
+  }
   if (g.prod && b.lvl >= 1) h += `<button class="knopf" id="iSam">${resEm(g.prod)} Einsammeln</button>`;
   if (b.typ === 'kaserne' || b.typ === 'heerlager') h += `<button class="knopf blau" id="iArmee">⚔️ Armee</button>`;
   h += `</div><p class="kleintext" style="margin-top:6px">Gebäude ziehen zum Verschieben.</p>`;
@@ -355,6 +393,8 @@ function infoZeigen() {
   on('iAlle', () => alleMauern(b.lvl));
   on('iSam', () => { einsammeln(b); infoZeigen(); });
   on('iArmee', () => armeeZeigen(true));
+  on('iG2H', () => tauschen('gold', 'holz'));
+  on('iH2G', () => tauschen('holz', 'gold'));
   on('iAbbr', () => frage('Bau abbrechen?', 'Du bekommst die Kosten vollständig zurück.', () => {
     const k = kosten(b.typ, b.ziel);
     S[k.res] += k.n;   // Erstattung darf übers Lager gehen
@@ -362,6 +402,14 @@ function infoZeigen() {
     else { b.ende = 0; b.ziel = 0; }
     merken(); infoZeigen(); uiDorf();
   }, 'Abbrechen'));
+}
+const marktMenge = () => 500 * rh() * rh();
+function tauschen(von, nach) {
+  const n = marktMenge();
+  if (maxRes(nach) - S[nach] < n * 0.8) { melden('Dafür ist im Lager kein Platz.'); ton('nein'); return; }
+  if (!bezahlen({ res: von, n })) return;
+  hinzu(nach, n * 0.8); ton('muenze'); merken(); uiDorf(); infoZeigen();
+  melden('⚖️ Getauscht: ' + fmt(n) + ' ' + resEm(von) + ' → ' + fmt(n * 0.8) + ' ' + resEm(nach));
 }
 function ausbauen(b) {
   const g = G[b.typ], neu = b.lvl + 1;
@@ -418,7 +466,7 @@ $('platzNein').onclick = () => { ton('klick'); platz = null; uiDorf(); };
 /* ---------------------------------------------------------------- Shop */
 let shopReiter = 'wirtschaft';
 function shopZeigen() {
-  const reiter = [['wirtschaft', '💰 Wirtschaft'], ['armee', '⚔️ Armee'], ['verteidigung', '🛡️ Verteidigung']];
+  const reiter = [['wirtschaft', '💰 Wirtschaft'], ['armee', '⚔️ Armee'], ['verteidigung', '🛡️ Verteidigung'], ['deko', '🌸 Deko']];
   $('shopReiter').innerHTML = reiter.map(([k, t]) => `<button data-r="${k}" class="${k === shopReiter ? 'an' : ''}">${t}</button>`).join('');
   $('shopReiter').querySelectorAll('button').forEach(b => b.onclick = () => { ton('klick'); shopReiter = b.dataset.r; shopZeigen(); });
   const r = rh();
@@ -434,6 +482,8 @@ function shopZeigen() {
     if (g.vert) stat = `⚔️ ${g.vert.schaden} · 🎯 ${g.vert.reich} · ${g.vert.boden && g.vert.luft ? 'Boden+Luft' : g.vert.luft ? 'Luft' : 'Boden'}`;
     else if (g.prod) stat = resEm(g.prod) + ' ' + fmt(prodRate(1)) + '/h';
     else if (g.lager) stat = 'Lager ' + fmt(LAGER_KAP[0]);
+    else if (g.falle) stat = '💥 ' + g.falle.schaden + ' · versteckt';
+    else if (g.deko) stat = 'Deko · sofort fertig';
     h += `<div class="ware ${aus ? 'aus' : ''}" data-t="${typ}"><span class="anz">${n}/${m}</span><div class="em">${g.em}</div><div class="n">${esc(g.name)}</div>
       <div class="stat">${stat}</div>
       <div class="k">${aus ? (naechst ? '🏛️ Rathaus ' + naechst : 'Maximum') : `<span class="${S[k.res] < k.n ? 'zu-teuer' : ''}">${fmt(k.n)} ${resEm(k.res)}</span>`}</div>
@@ -452,7 +502,7 @@ function shopZeigen() {
 function armeeZeigen(oeffnenAuch) {
   const kl = kaserneLvl(), kap = armeePlatz(), bel = armeeBelegt(), sch = schlangeBelegt();
   $('armeeInfo').innerHTML = `👥 Armee: <b>${bel}/${kap}</b> Plätze · in Ausbildung: ${sch} · Kaserne Stufe ${kl || '–'} · Schmiede Stufe ${schmiedeLvl() || '–'}`;
-  const jetztH = T_LISTE.filter(t => S.armee[t] > 0).map(t => `<div class="t" title="${esc(T[t].name)}">${T[t].em}<small>×${S.armee[t]}</small></div>`).join('');
+  const jetztH = TRUPPEN.filter(t => S.armee[t] > 0).map(t => `<div class="t" title="${esc(T[t].name)}">${T[t].em}<small>×${S.armee[t]}</small></div>`).join('');
   $('armeeJetzt').innerHTML = jetztH || '<span class="hinweis">Noch keine Truppen bereit.</span>';
   const t0 = jetzt();
   $('armeeSchlange').innerHTML = S.schlange.map((t, i) => {
@@ -466,7 +516,7 @@ function armeeZeigen(oeffnenAuch) {
     ton('klick'); merken(); armeeZeigen(); uiDorf();
   });
   const m = Math.pow(1.2, schmiedeLvl());
-  $('armeeRaster').innerHTML = T_LISTE.map(t => {
+  $('armeeRaster').innerHTML = TRUPPEN.map(t => {
     const d = T[t], frei = kl >= d.kas;
     return `<div class="ware ${frei ? '' : 'aus'}" data-t="${t}"><span class="anz">👥 ${d.platz}</span><div class="em">${d.em}</div><div class="n">${esc(d.name)}</div>
       <div class="stat">❤️ ${Math.round(d.hp * m)} · ⚔️ ${Math.round(d.schaden * m)}${d.flug ? ' · fliegt' : ''}</div>
@@ -598,7 +648,7 @@ function dorfErzeugen(stufe, seed, leicht) {
   const kern = [];
   // Verteidigung und Lager in den Kern
   const kernTypen = [];
-  ['goldtruhe', 'holzlager', 'moerser', 'windturm', 'bogenturm', 'schleuder'].forEach(t => { for (let i = 0; i < Math.max(t === 'goldtruhe' || t === 'holzlager' ? 1 : 0, zahl(t)); i++) kernTypen.push(t); });
+  ['goldtruhe', 'holzlager', 'balliste', 'glutturm', 'moerser', 'windturm', 'bogenturm', 'schleuder'].forEach(t => { for (let i = 0; i < Math.max(t === 'goldtruhe' || t === 'holzlager' ? 1 : 0, zahl(t)); i++) kernTypen.push(t); });
   // mehr Platz für mehr Gebäude
   const kernR = 3.2 + kernTypen.length * 0.33;
   for (const t of kernTypen) {
@@ -644,6 +694,14 @@ function dorfErzeugen(stufe, seed, leicht) {
     for (let k = 0; k < 6 && !b; k++) b = ringSetzen(t, rAussen, rAussen + 3 + k, c, c);
     rAussen = Math.min(rAussen + 0.15, N / 2 - 4);
   }
+  // Fallen verstecken: freie Felder im Kern
+  for (let i = 0, n = zahl('falle'); i < n; i++) {
+    for (let v = 0; v < 80; v++) {
+      const a = r() * Math.PI * 2, d = 2.5 + r() * (kernR + 2);
+      const x = Math.floor(c + Math.cos(a) * d), y = Math.floor(c + Math.sin(a) * d);
+      if (x > 2 && y > 2 && x < N - 3 && y < N - 3 && occ[y * N + x] === -1) { setzen('falle', x, y); break; }
+    }
+  }
   // Beute verteilen
   const pool = { gold: BEUTE_BASIS[stufe - 1] * (0.7 + r() * 0.6), holz: BEUTE_BASIS[stufe - 1] * (0.7 + r() * 0.6) };
   for (const b of bauten) b.beute = { gold: 0, holz: 0 };
@@ -659,6 +717,7 @@ function dorfErzeugen(stufe, seed, leicht) {
 }
 
 let B = null;   // Kampfzustand
+const zaehlt = typ => typ !== 'mauer' && !G[typ].falle && !G[typ].deko;
 function kampfStarten(art, info) {
   const bauten = dorfErzeugen(info.stufe, info.seed, info.leicht);
   let faktor = 1;
@@ -668,17 +727,19 @@ function kampfStarten(art, info) {
     b.max = b.hp = lebenVon(b.typ, b.lvl); b.tot = false; b.cd = Math.random() * 0.5; b.ziel = null;
     b.beute.gold *= faktor; b.beute.holz *= faktor;
     const s = G[b.typ].gr;
+    if (G[b.typ].falle) return;   // Fallen blockieren nichts
     for (let y = b.y; y < b.y + s; y++) for (let x = b.x; x < b.x + s; x++) occ[y * N + x] = i;
   });
   const verbot = new Uint8Array(N * N);
-  for (const b of bauten) { const s = G[b.typ].gr; for (let y = b.y - 1; y <= b.y + s; y++) for (let x = b.x - 1; x <= b.x + s; x++) if (x >= 0 && y >= 0 && x < N && y < N) verbot[y * N + x] = 1; }
+  for (const b of bauten) { if (G[b.typ].falle) continue; const s = G[b.typ].gr; for (let y = b.y - 1; y <= b.y + s; y++) for (let x = b.x - 1; x <= b.x + s; x++) if (x >= 0 && y >= 0 && x < N && y < N) verbot[y * N + x] = 1; }
   const beute = { gold: 0, holz: 0 };
   for (const b of bauten) { beute.gold += b.beute.gold; beute.holz += b.beute.holz; }
   const verfuegbar = {};
-  for (const t of T_LISTE) if (S.armee[t] > 0) verfuegbar[t] = S.armee[t];
+  for (const t of TRUPPEN) if (S.armee[t] > 0) verfuegbar[t] = S.armee[t];
+  if (heldenLvl()) verfuegbar.held = 1;
   B = { art, info, bauten, occ, verbot, einheiten: [], geschosse: [], zeit: 180, laeuft: false, vorbei: false, endeIn: 0,
         verfuegbar, eingesetzt: {}, auswahl: T_LISTE.find(t => verfuegbar[t] > 0) || null, geholt: { gold: 0, holz: 0 }, beute,
-        sterne: 0, prozent: 0, rhTot: false, version: 0, tempo: 1, gesamt: bauten.filter(b => b.typ !== 'mauer').length, kaputt: 0,
+        sterne: 0, prozent: 0, rhTot: false, version: 0, tempo: 1, gesamt: bauten.filter(b => zaehlt(b.typ)).length, kaputt: 0,
         nachbarn: mauerNachbarn(bauten), mult: Math.pow(1.2, schmiedeLvl()) };
   modus = 'kampf'; gewaehlt = null; platz = null;
   schliessen('fAngriff'); infoZeigen(); kameraZentrieren(); uiDorf(); kampfUi(true);
@@ -693,7 +754,7 @@ function angriffZeigen(reiter) {
   reiter = reiter || angriffZeigen.reiter || 'mehr'; angriffZeigen.reiter = reiter;
   $('angriffReiter').innerHTML = `<button data-r="mehr" class="${reiter === 'mehr' ? 'an' : ''}">🏆 Plündern</button><button data-r="kampagne" class="${reiter === 'kampagne' ? 'an' : ''}">🗺️ Kampagne</button>`;
   $('angriffReiter').querySelectorAll('button').forEach(b => b.onclick = () => { ton('klick'); angriffZeigen(b.dataset.r); });
-  const truppen = T_LISTE.filter(t => S.armee[t] > 0).map(t => T[t].em + '×' + S.armee[t]).join(' ') || 'keine';
+  const truppen = TRUPPEN.filter(t => S.armee[t] > 0).map(t => T[t].em + '×' + S.armee[t]).join(' ') || 'keine';
   let h = `<p class="hinweis">Deine Armee: ${truppen} (${armeeBelegt()}/${armeePlatz()})</p>`;
   if (reiter === 'mehr') {
     h += `<p style="font-weight:500">Such dir ein Räuberdorf in deiner Stärke, klau Gold und Holz und hol Trophäen. Verlierst du, gehen Trophäen verloren.</p>
@@ -764,7 +825,7 @@ function setzeEinheit(t, fx, fy) {
   if (!B.verfuegbar[t]) { melden('Keine ' + T[t].name + ' mehr übrig.'); return false; }
   const x = Math.floor(fx), y = Math.floor(fy);
   if (x < 0 || y < 0 || x >= N || y >= N || B.verbot[y * N + x]) { return 'rot'; }
-  const d = T[t], m = B.mult;
+  const d = T[t], m = d.held ? Math.pow(1.2, heldenLvl() - 1) : B.mult;
   B.einheiten.push({ t, x: fx, y: fy, hp: d.hp * m, max: d.hp * m, schaden: d.schaden * m, cd: 0.2, ziel: null, mauer: null, pfad: null, pfadV: -1, pi: 0,
     ox: (Math.random() - 0.5) * 0.3, oy: (Math.random() - 0.5) * 0.3, phase: Math.random() * 6, lauf: false, rx: 1, ry: 1 });
   B.verfuegbar[t]--; B.eingesetzt[t] = (B.eingesetzt[t] || 0) + 1;
@@ -789,7 +850,7 @@ const mitte = b => { const s = G[b.typ].gr; return [b.x + s / 2, b.y + s / 2]; }
 
 function zielSuchen(u) {
   const d = T[u.t];
-  let kand = B.bauten.filter(b => !b.tot && b.typ !== 'mauer');
+  let kand = B.bauten.filter(b => !b.tot && zaehlt(b.typ));
   if (d.ziel === 'verteidigung') { const k = kand.filter(b => G[b.typ].vert); if (k.length) kand = k; }
   else if (d.ziel === 'rohstoff') { const k = kand.filter(b => istRohstoff(b.typ)); if (k.length) kand = k; }
   else if (d.ziel === 'mauer') { const k = B.bauten.filter(b => !b.tot && b.typ === 'mauer'); if (k.length) kand = k; }
@@ -861,7 +922,7 @@ function bauSchaden(b, n, quelle) {
     effekt(mx, my, 0.3, 'staub', G[b.typ].gr / 2.2); ton('kaputt');
     const ges = b.beute.gold + b.beute.holz;
     if (ges >= 1) schwebText(mx, my, 1.8, (b.beute.gold >= 1 ? '+' + fmt(b.beute.gold) + '🪙 ' : '') + (b.beute.holz >= 1 ? '+' + fmt(b.beute.holz) + '🪵' : ''), '#ffe066');
-    if (b.typ !== 'mauer') {
+    if (zaehlt(b.typ)) {
       B.kaputt++; B.prozent = B.kaputt / B.gesamt * 100;
       if (b.typ === 'rathaus') B.rhTot = true;
       const st = (B.prozent >= 50 ? 1 : 0) + (B.rhTot ? 1 : 0) + (B.prozent >= 100 ? 1 : 0);
@@ -874,7 +935,7 @@ function bauSchaden(b, n, quelle) {
 function flaechenSchadenBau(x, y, rad, n, u) {
   const d = T[u.t];
   for (const b of B.bauten) {
-    if (b.tot) continue;
+    if (b.tot || G[b.typ].falle) continue;
     if (abstand(x, y, b) <= rad) {
       let m = n;
       if (b.typ === 'mauer' && d.ziel === 'mauer') m *= d.bonus;
@@ -911,9 +972,30 @@ function geheZu(u, tx, ty, dt) {
   if (sch >= l) { u.x = tx; u.y = ty; return true; }
   u.x += dx / l * sch; u.y += dy / l * sch; return false;
 }
+function heilerSchritt(u, d, dt) {
+  // Folgt der am meisten verletzten Bodentruppe, sonst der nächsten
+  let ziel = null, wert = Infinity;
+  for (const e of B.einheiten) {
+    if (e === u || e.hp <= 0 || T[e.t].flug || T[e.t].heiler) continue;
+    const a = Math.hypot(e.x - u.x, e.y - u.y), w = (e.hp / e.max) * 6 + a * 0.3;
+    if (a < 12 && w < wert) { wert = w; ziel = e; }
+  }
+  if (!ziel) for (const e of B.einheiten) if (e !== u && e.hp > 0 && !T[e.t].heiler) { const a = Math.hypot(e.x - u.x, e.y - u.y); if (a < wert) { wert = a; ziel = e; } }
+  if (ziel && Math.hypot(ziel.x - u.x, ziel.y - u.y) > 1.6) geheZu(u, ziel.x, ziel.y, dt);
+  if (u.cd > 0) return;
+  let geheilt = 0;
+  for (const e of B.einheiten) {
+    if (e.hp <= 0 || T[e.t].flug || e.hp >= e.max || Math.hypot(e.x - u.x, e.y - u.y) > d.reich) continue;
+    e.hp = Math.min(e.max, e.hp + d.heilung * B.mult); geheilt++;
+    effekt(e.x, e.y, 0.9, 'heilen');
+  }
+  u.cd = d.takt;
+  if (geheilt) u.angriffT = performance.now();
+}
 function einheitSchritt(u, dt) {
   const d = T[u.t];
   u.cd = Math.max(0, u.cd - dt); u.lauf = false;
+  if (d.heiler) { heilerSchritt(u, d, dt); return; }
   if (u.mauer && u.mauer.tot) u.mauer = null;
   if (!u.ziel || u.ziel.tot) { u.ziel = zielSuchen(u); u.pfad = null; u.mauer = null; if (!u.ziel) return; }
   const ziel = u.mauer || u.ziel;
@@ -948,15 +1030,34 @@ function vertSchritt(b, dt) {
       treffer: () => { effekt(tx, ty, 0.1, 'boom', 1.2); ton('boom'); for (const e of B.einheiten) if (e.hp > 0 && !T[e.t].flug && Math.hypot(e.x - tx, e.y - ty) <= v.flaeche) e.hp -= n; } });
   } else {
     const ziel = u;
-    B.geschosse.push({ von: [mx, my, h], ziel, t: 0, dauer: Math.max(0.12, Math.hypot(u.x - mx, u.y - my) / (v.art === 'pfeil' ? 16 : v.art === 'wind' ? 12 : 11)), art: v.art,
-      treffer: () => { if (ziel.hp > 0) { ziel.hp -= n; effekt(ziel.x, ziel.y, T[ziel.t].flug ? 1.9 : 0.6, 'treffer'); } } });
+    B.geschosse.push({ von: [mx, my, h], ziel, t: 0, dauer: Math.max(0.12, Math.hypot(u.x - mx, u.y - my) / (v.art === 'pfeil' ? 16 : v.art === 'bolzen' ? 18 : v.art === 'wind' ? 12 : v.art === 'glut' ? 8 : 11)), art: v.art,
+      treffer: () => {
+        if (v.flaeche) {
+          const tx = ziel.x, ty = ziel.y; effekt(tx, ty, T[ziel.t].flug ? 1.8 : 0.4, 'glut', 0.8); ton('boom');
+          for (const e of B.einheiten) if (e.hp > 0 && passt(e) && Math.hypot(e.x - tx, e.y - ty) <= v.flaeche) e.hp -= n;
+        } else if (ziel.hp > 0) { ziel.hp -= n; effekt(ziel.x, ziel.y, T[ziel.t].flug ? 1.9 : 0.6, 'treffer'); }
+      } });
   }
+}
+function fallenSchritt(b, dt) {
+  const f = G[b.typ].falle;
+  if (b.zuendung == null) {
+    for (const u of B.einheiten) if (u.hp > 0 && !T[u.t].flug && Math.hypot(u.x - b.x - 0.5, u.y - b.y - 0.5) < 0.9) { b.zuendung = 0.35; b.offen = true; break; }
+    return;
+  }
+  b.zuendung -= dt;
+  if (b.zuendung > 0) return;
+  const n = f.schaden * Math.pow(1.25, b.lvl - 1);
+  effekt(b.x + 0.5, b.y + 0.5, 0.1, 'boom', 1.3); ton('boom');
+  for (const u of B.einheiten) if (u.hp > 0 && !T[u.t].flug && Math.hypot(u.x - b.x - 0.5, u.y - b.y - 0.5) <= f.flaeche) u.hp -= n;
+  b.tot = true;
 }
 function kampfSchritt(dt) {
   if (!B || B.vorbei) return;
   if (B.laeuft) B.zeit -= dt;
   for (const u of B.einheiten) if (u.hp > 0) einheitSchritt(u, dt);
   for (const b of B.bauten) if (!b.tot && G[b.typ].vert) vertSchritt(b, dt);
+  for (const b of B.bauten) if (!b.tot && G[b.typ].falle) fallenSchritt(b, dt);
   for (const g of B.geschosse) {
     g.t += dt;
     if (g.t >= g.dauer && !g.fertig) { g.fertig = true; g.treffer(); }
@@ -968,7 +1069,7 @@ function kampfSchritt(dt) {
   }
   B.einheiten = B.einheiten.filter(u => !u.weg);
   const nochDa = Object.values(B.verfuegbar).some(n => n > 0);
-  if (B.laeuft && !B.einheiten.length && !nochDa && !B.endeIn) B.endeIn = 1.2;
+  if (B.laeuft && !B.einheiten.some(u => !T[u.t].heiler) && !nochDa && !B.endeIn) B.endeIn = 1.2;
   if (B.laeuft && B.zeit <= 0 && !B.endeIn) { B.zeit = 0; B.endeIn = 0.01; }
   if (B.endeIn) { B.endeIn -= dt; if (B.endeIn <= 0) kampfEnde(); }
 }
@@ -977,7 +1078,7 @@ function kampfEnde() {
   B.vorbei = true;
   const gold = Math.floor(B.geholt.gold), holz = Math.floor(B.geholt.holz);
   const gG = hinzu('gold', gold), gH = hinzu('holz', holz);
-  for (const t in B.eingesetzt) S.armee[t] = Math.max(0, (S.armee[t] || 0) - B.eingesetzt[t]);
+  for (const t in B.eingesetzt) if (!T[t].held) S.armee[t] = Math.max(0, (S.armee[t] || 0) - B.eingesetzt[t]);
   S.stat.angriffe++; S.stat.geplündert = (S.stat.geplündert || 0) + gG + gH;
   if (B.sterne > 0) { S.stat.siege++; }
   let trophText = '';
@@ -1012,7 +1113,7 @@ function zeichnen(dt) {
   const jetztMs = performance.now();
   if (modus === 'kampf' && B) {
     if (B.auswahl && !B.vorbei && B.verfuegbar[B.auswahl] > 0) sz.verbot = B.verbot;
-    for (const b of B.bauten) sz.bauten.push({ key: b, typ: b.typ, gr: G[b.typ].gr, x: b.x, y: b.y, lvl: b.lvl, team: 'gegner', tot: b.tot, hp: b.hp / b.max,
+    for (const b of B.bauten) if (!G[b.typ].falle || b.offen) sz.bauten.push({ key: b, typ: b.typ, gr: G[b.typ].gr, x: b.x, y: b.y, lvl: b.lvl, team: 'gegner', tot: b.tot, hp: b.hp / b.max,
       nachbarn: b.typ === 'mauer' ? B.nachbarn(b) : 0, winkel: b.winkel, feuer: b.feuerT ? jetztMs - b.feuerT : null });
     for (const u of B.einheiten) sz.einheiten.push({ key: u, t: u.t, x: u.x + u.ox, y: u.y + u.oy, flug: !!T[u.t].flug, hp: u.hp, max: u.max, lauf: u.lauf,
       rx: u.rx, ry: u.ry, angriff: u.angriffT ? jetztMs - u.angriffT : null, phase: u.phase });
@@ -1038,7 +1139,7 @@ function zeichnen(dt) {
     if (platz) sz.bauten.push({ key: 'platz:' + platz.typ, typ: platz.typ, gr: G[platz.typ].gr, x: platz.x, y: platz.y, lvl: 1, team: 'spieler',
       geist: frei(platz.typ, platz.x, platz.y, null) ? 'ok' : 'nein' });
     sz.lager = [];
-    for (const t2 of T_LISTE) for (let i = 0; i < Math.min(S.armee[t2] || 0, 12); i++) sz.lager.push(t2);
+    for (const t2 of TRUPPEN) for (let i = 0; i < Math.min(S.armee[t2] || 0, 12); i++) sz.lager.push(t2);
     sz.lager = sz.lager.slice(0, 40);
   }
   TVG.render(sz, dt);
@@ -1155,7 +1256,7 @@ cv.addEventListener('wheel', e => { e.preventDefault(); zoomBei(Math.exp(-e.delt
 cv.addEventListener('contextmenu', e => e.preventDefault());
 addEventListener('keydown', e => {
   if (e.key === 'Escape') { if (platz) { platz = null; uiDorf(); } else if (gewaehlt) { gewaehlt = null; infoZeigen(); } }
-  if (modus === 'kampf' && B && /^[1-6]$/.test(e.key)) { const t = T_LISTE.filter(k => B.verfuegbar[k] !== undefined)[+e.key - 1]; if (t) { B.auswahl = t; kampfUi(); } }
+  if (modus === 'kampf' && B && /^[1-8]$/.test(e.key)) { const t = T_LISTE.filter(k => B.verfuegbar[k] !== undefined)[+e.key - 1]; if (t) { B.auswahl = t; kampfUi(); } }
 });
 addEventListener('resize', groesse);
 

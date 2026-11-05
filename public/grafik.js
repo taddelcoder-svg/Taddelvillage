@@ -263,6 +263,109 @@ const MODELL = {
     g.userData.dreh = [{ m: rotor, achse: 'z', v: 5 }];
     g.userData.turm = turm; g.userData.hoehe = 4.1;
   },
+  glutturm(g, lvl) {
+    const st = stil(lvl);
+    walze(g, 1.1, 1.25, 0.4, 8, st.sockel === '#93653a' ? '#8a8f94' : st.sockel, 0, 0, 0);
+    walze(g, 0.55, 0.8, 2.0, 8, '#a8968a', 0, 0.4, 0);
+    for (const y of [0.9, 1.6]) walze(g, 0.74 - y * 0.08, 0.76 - y * 0.08, 0.1, 8, '#6e5a4a', 0, y, 0);
+    for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + Math.PI / 4; kiste(g, 0.08, 0.5, 0.04, '#ff9a3c', Math.cos(a) * 0.74, 0.9, Math.sin(a) * 0.74, { e: '#ff5a00', ei: 1.5 }, -a + Math.PI / 2); }
+    walze(g, 0.8, 0.5, 0.4, 10, '#55555c', 0, 2.4, 0, METALL);
+    for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; kiste(g, 0.18, 0.2, 0.12, '#55555c', Math.cos(a) * 0.75, 2.75, Math.sin(a) * 0.75, METALL, -a); }
+    walze(g, 0.7, 0.7, 0.03, 10, '#8a2a0a', 0, 2.78, 0, { e: '#c0390b', ei: 1.2 });
+    const f1 = kegel(g, 0.5, 1.2, 7, '#ff6a1a', 0, 2.8, 0, 0, { e: '#ff4a00', ei: 1.6 }), f2 = kegel(g, 0.3, 0.95, 7, '#ffe066', 0, 2.82, 0, 0.4, { e: '#ffd000', ei: 2.2 });
+    f1.castShadow = f2.castShadow = false;
+    g.userData.flammen = [f1, f2];
+    if (lvl >= 4) for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2; kegel(g, 0.08, 0.3, 4, '#f2c230', Math.cos(a) * 0.9, 2.8, Math.sin(a) * 0.9, 0, GOLD); }
+    g.userData.rauch = [0, 4.0, 0]; g.userData.hoehe = 4.2;
+  },
+  balliste(g, lvl) {
+    const st = stil(lvl);
+    kiste(g, 2.5, 0.55, 2.5, st.sockel === '#93653a' ? '#8a8f94' : st.sockel, 0, 0, 0);
+    for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) kiste(g, 0.4, 0.3, 0.4, '#7d8288', x * 1.05, 0.55, z * 1.05);
+    const turm = new T3.Group(); turm.position.y = 0.55; g.add(turm);
+    walze(turm, 0.5, 0.6, 0.25, 8, '#5a3a1d', 0, 0, 0);
+    kiste(turm, 0.3, 0.45, 0.3, '#6b4423', 0, 0.25, 0);
+    const kopf = new T3.Group(); kopf.position.y = 0.75; kopf.rotation.x = -0.12; turm.add(kopf);
+    kiste(kopf, 0.26, 0.18, 1.7, '#8b5a2b', 0, -0.09, 0.1);
+    for (const sx of [-1, 1]) { const arm = kiste(kopf, 0.9, 0.1, 0.12, '#5a3a1d', sx * 0.48, -0.05, 0.75); arm.rotation.y = sx * 0.35; }
+    kiste(kopf, 1.5, 0.03, 0.03, '#ddd', 0, 0, 0.45);
+    const bolzen = kiste(kopf, 0.07, 0.07, 1.5, '#4a3020', 0, 0.09, 0.3); kegel(kopf, 0.08, 0.22, 4, '#c0c6cc', 0, 0.12, 1.15, 0, METALL).rotation.x = Math.PI / 2;
+    if (lvl >= 4) kiste(kopf, 0.3, 0.05, 0.3, '#f2c230', 0, 0.09, -0.5, GOLD);
+    g.userData.turm = turm; g.userData.bolzen = bolzen; g.userData.hoehe = 2.2;
+  },
+  falle(g, lvl) {
+    walze(g, 0.38, 0.42, 0.06, 8, '#4a4038', 0, 0, 0);
+    for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; kegel(g, 0.05, 0.16, 4, '#9aa0a6', Math.cos(a) * 0.22, 0.06, Math.sin(a) * 0.22, 0, METALL); }
+    kugel(g, 0.12, '#2f2f35', 0, 0.12, 0, METALL);
+    kugel(g, 0.035, '#ff3b2e', 0, 0.25, 0, { e: '#ff2200', ei: 1.5 });
+    g.userData.hoehe = 0.6;
+  },
+  markt(g) {
+    kiste(g, 2.6, 0.12, 2.6, '#c9a46b', 0, 0, 0);
+    const stand = (x, z, ry, farbe) => {
+      const h = new T3.Group(); h.position.set(x, 0.12, z); h.rotation.y = ry; g.add(h);
+      kiste(h, 1.1, 0.5, 0.6, '#8b5a2b', 0, 0, 0);
+      for (const [px, pz] of [[-0.5, -0.28], [0.5, -0.28], [-0.5, 0.28], [0.5, 0.28]]) kiste(h, 0.07, 1.05 + (pz < 0 ? 0.2 : 0), 0.07, '#6b4423', px, 0, pz);
+      for (let i = 0; i < 6; i++) { const st = kiste(h, 0.2, 0.04, 0.8, i % 2 ? '#ffffff' : farbe, -0.5 + i * 0.2, 1.2, 0); st.rotation.x = 0.25; }
+      for (let i = 0; i < 5; i++) kugel(h, 0.07, i % 2 ? '#d93a2b' : '#7cc84a', -0.3 + i * 0.13, 0.57, 0.05);
+      walze(h, 0.12, 0.12, 0.06, 10, '#f2c230', 0.35, 0.5, -0.12, GOLD);
+    };
+    stand(-0.55, -0.35, 0, '#d9442f'); stand(0.55, 0.5, -Math.PI / 2, '#2f7bf6');
+    walze(g, 0.2, 0.23, 0.45, 9, '#7a5230', 0.9, 0.12, -0.9); kiste(g, 0.35, 0.35, 0.35, '#a0703f', -0.95, 0.12, 0.85);
+    kiste(g, 0.3, 0.3, 0.3, '#b98a4e', -0.6, 0.12, 0.95);
+    g.userData.hoehe = 1.9;
+  },
+  heldenhalle(g, lvl, team) {
+    const st = stil(lvl);
+    kiste(g, 2.7, 0.25, 2.7, '#a2a7ad', 0, 0, 0); kiste(g, 2.3, 0.2, 2.3, '#c9ccd0', 0, 0.25, 0);
+    kiste(g, 1.2, 0.12, 0.35, '#a2a7ad', 0, 0, 1.45);
+    for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { walze(g, 0.13, 0.15, 1.5, 10, '#ece6d8', x * 0.95, 0.45, z * 0.95, { glatt: true }); kiste(g, 0.34, 0.1, 0.34, '#d8d2c4', x * 0.95, 1.95, z * 0.95); }
+    kiste(g, 2.4, 0.22, 2.4, '#d8d2c4', 0, 2.05, 0);
+    kiste(g, 2.45, 0.07, 2.45, st.gold ? '#f2c230' : '#3d5a9e', 0, 2.1, 0, st.gold ? GOLD : null);
+    walmdach(g, 2.5, 0.75, '#3d5a9e', 2.27);
+    kiste(g, 0.7, 0.9, 0.2, '#7a2a2a', 0, 0.45, -0.75); kiste(g, 0.7, 0.3, 0.5, '#7a2a2a', 0, 0.45, -0.6);
+    kiste(g, 0.78, 0.08, 0.08, '#f2c230', 0, 1.35, -0.75, GOLD);
+    const held = figurBauen('held'); held.position.set(0, 0.25, 1.15); g.add(held);
+    g.userData.held = held;
+    fahne(g, 1.25, 0.25, 1.25, team, 1.6);
+    g.userData.hoehe = 3.2;
+  },
+  brunnen(g) {
+    walze(g, 0.85, 0.9, 0.35, 14, '#b9bdc2', 0, 0, 0);
+    const w = walze(g, 0.72, 0.72, 0.04, 14, '#4fa8e0', 0, 0.3, 0, { r: 0.15, m: 0.1, glatt: true }); w.castShadow = false;
+    walze(g, 0.12, 0.16, 0.8, 8, '#b9bdc2', 0, 0.3, 0);
+    walze(g, 0.35, 0.12, 0.12, 10, '#b9bdc2', 0, 1.05, 0);
+    const s1 = walze(g, 0.05, 0.12, 0.45, 8, '#bfe6ff', 0, 1.15, 0, { a: 0.6, e: '#9ad8ff', ei: 0.3 }); s1.castShadow = false;
+    g.userData.wasser = s1; g.userData.hoehe = 1.8;
+  },
+  statue(g) {
+    kiste(g, 1.2, 0.6, 1.2, '#a2a7ad', 0, 0, 0); kiste(g, 1.35, 0.1, 1.35, '#8a8f94', 0, 0.6, 0);
+    const L = new T3.Group(); L.position.y = 0.7; g.add(L);
+    kugel(L, 0.32, '#e8b923', 0, 0.45, -0.05, GOLD).scale.set(0.85, 0.9, 1.25);
+    for (const [x, z] of [[-0.16, 0.22], [0.16, 0.22], [-0.16, -0.3], [0.16, -0.3]]) walze(L, 0.07, 0.08, 0.3, 6, '#e8b923', x, 0, z, GOLD);
+    brocken(L, 0.27, '#d4a017', 0, 0.78, 0.3, GOLD);
+    kugel(L, 0.17, '#f2c230', 0, 0.78, 0.42, GOLD);
+    teil(L, geo('CylinderGeometry', 0.03, 0.05, 0.4, 5), mat('#e8b923', GOLD), 0, 0.6, -0.5, -0.8, 0, 0);
+    g.userData.hoehe = 2.2;
+  },
+  blumen(g) {
+    kiste(g, 0.8, 0.12, 0.8, '#6b4423', 0, 0, 0);
+    const r = zufall(5), farben = ['#ff5a7a', '#ffd34d', '#ffffff', '#b07cff', '#ff8a3c'];
+    for (let i = 0; i < 9; i++) { const x = -0.27 + (i % 3) * 0.27, z = -0.27 + Math.floor(i / 3) * 0.27; walze(g, 0.015, 0.015, 0.2, 4, '#3f8a33', x, 0.12, z); kugel(g, 0.07, farben[Math.floor(r() * 5)], x, 0.34, z); }
+    g.userData.hoehe = 0.7;
+  },
+  baum(g) {
+    walze(g, 0.09, 0.13, 0.7, 6, '#6b4423', 0, 0, 0);
+    teil(g, geo('IcosahedronGeometry', 0.45, 0), mat('#5dae42'), 0, 1.0, 0);
+    teil(g, geo('IcosahedronGeometry', 0.3, 0), mat('#6bb84a'), 0.15, 1.35, 0.05);
+    g.userData.hoehe = 1.8;
+  },
+  fahnenmast(g, lvl, team) {
+    walze(g, 0.22, 0.26, 0.15, 8, '#a2a7ad', 0, 0, 0);
+    fahne(g, 0, 0.15, 0, team, 2.2);
+    kugel(g, 0.06, '#f2c230', 0, 2.38, 0, GOLD);
+    g.userData.hoehe = 2.6;
+  },
   mauer(g, lvl, team, nb) {
     const farbe = ['#93653a', '#a8743f', '#a2a7ad', '#b39b72', '#8e959c', '#c9b27a', '#6b7580', '#4d5763', '#e3b23c'][lvl - 1] || '#a2a7ad';
     const o = lvl >= 9 ? GOLD : null;
@@ -414,8 +517,37 @@ const FIGUR = {
     for (const x of [-0.08, 0.08]) kiste(k, 0.06, 0.16, 0.06, '#c79a4a', x, -0.26, 0.05);
     kiste(k, 0.2, 0.04, 0.18, SPIELER, 0, 0.17, 0.0);
   },
+  hexe(k, t) {
+    t.beinL = glied(k, 0.08, 0.2, 0.09, '#3b2a4a', -0.07, 0.2, 0); t.beinR = glied(k, 0.08, 0.2, 0.09, '#3b2a4a', 0.07, 0.2, 0);
+    kegel(k, 0.24, 0.5, 8, '#3f7a4a', 0, 0.05, 0);
+    kiste(k, 0.27, 0.05, 0.2, SPIELER, 0, 0.38, 0);
+    t.armL = glied(k, 0.07, 0.22, 0.08, '#3f7a4a', -0.15, 0.48, 0); t.armR = glied(k, 0.07, 0.22, 0.08, '#3f7a4a', 0.15, 0.48, 0);
+    kugel(k, 0.12, '#e9c9a5', 0, 0.62, 0);
+    kugel(k, 0.035, '#d08a6a', 0, 0.6, 0.12);
+    walze(k, 0.2, 0.2, 0.03, 10, '#5a2d6b', 0, 0.68, 0); kegel(k, 0.13, 0.32, 8, '#5a2d6b', 0, 0.7, 0);
+    kiste(k, 0.18, 0.12, 0.05, '#cfcfcf', 0, 0.48, 0.1);
+    const stab = new T3.Group(); stab.position.set(0, -0.2, 0.05); t.armR.add(stab);
+    kiste(stab, 0.035, 0.6, 0.035, '#6b4423', 0, -0.2, 0);
+    const kug = kugel(stab, 0.07, '#7dff9a', 0, 0.42, 0, { e: '#3dff6a', ei: 1.6 }); kug.castShadow = false; t.funke = kug;
+  },
+  held(k, t) {
+    t.beinL = glied(k, 0.13, 0.24, 0.14, '#3d5a9e', -0.1, 0.24, 0); t.beinR = glied(k, 0.13, 0.24, 0.14, '#3d5a9e', 0.1, 0.24, 0);
+    kiste(k, 0.4, 0.34, 0.28, '#c9ccd0', 0, 0.22, 0, METALL);
+    kiste(k, 0.42, 0.07, 0.3, '#f2c230', 0, 0.22, 0, GOLD);
+    for (const x of [-0.25, 0.25]) kugel(k, 0.1, '#f2c230', x, 0.55, 0, GOLD);
+    kiste(k, 0.4, 0.4, 0.04, SPIELER, 0, 0.18, -0.16);
+    t.armL = glied(k, 0.11, 0.28, 0.12, '#d4a24c', -0.27, 0.53, 0); t.armR = glied(k, 0.11, 0.28, 0.12, '#d4a24c', 0.27, 0.53, 0);
+    brocken(k, 0.22, '#b5651d', 0, 0.72, -0.03).scale.set(1.1, 1.05, 0.9);
+    kugel(k, 0.15, '#e0b05a', 0, 0.71, 0.08);
+    kugel(k, 0.06, '#f0d9a0', 0, 0.66, 0.2); kugel(k, 0.025, '#3a2410', 0, 0.69, 0.25);
+    for (const x of [-0.06, 0.06]) kiste(k, 0.03, 0.03, 0.02, '#111', x, 0.75, 0.215);
+    for (const x of [-0.11, 0.11]) kugel(k, 0.05, '#e0b05a', x, 0.86, 0.04);
+    kegel(k, 0.12, 0.1, 5, '#f2c230', 0, 0.9, 0, 0, GOLD);
+    const schwert = new T3.Group(); schwert.position.set(0, -0.26, 0.06); schwert.rotation.x = 1.4; t.armR.add(schwert);
+    kiste(schwert, 0.06, 0.12, 0.06, '#5a3a1d', 0, -0.06, 0); kiste(schwert, 0.2, 0.04, 0.05, '#f2c230', 0, 0.06, 0, GOLD); kiste(schwert, 0.05, 0.55, 0.02, '#e6eaee', 0, 0.08, 0, METALL);
+  },
 };
-const FIGUR_GROESSE = { raufbold: 1.35, schleuderin: 1.3, waschbaer: 1.3, maulwurf: 1.35, troll: 1.75, greif: 1.6 };
+const FIGUR_GROESSE = { raufbold: 1.35, schleuderin: 1.3, waschbaer: 1.3, maulwurf: 1.35, troll: 1.75, greif: 1.6, hexe: 1.35, held: 1.7 };
 function figurBauen(typ) {
   const g = new T3.Group(), k = new T3.Group(); g.add(k);
   const t = {}; FIGUR[typ](k, t);
@@ -596,6 +728,11 @@ function effekt(x, y, h, art, gr) {
     for (let i = 0; i < 5; i++) { const a = Math.random() * 6.3; teilchen(kugelG, '#d8c8a8', x, 0.1, y, Math.cos(a), 0.6, Math.sin(a), 0.5, 0.1, 0.25, { alpha: 0.7 }); }
   } else if (art === 'muenzen' || art === 'holz') {
     for (let i = 0; i < 8; i++) { const a = Math.random() * 6.3, v = 0.5 + Math.random(); teilchen(art === 'holz' ? wuerfel : geo('CylinderGeometry', 1, 1, 0.3, 10), art === 'holz' ? '#a0703f' : '#f2c230', x, h, y, Math.cos(a) * v, 3 + Math.random() * 2, Math.sin(a) * v, 0.9, 0.12, 0.12, { g: 7, dreh: 6 }); }
+  } else if (art === 'heilen') {
+    for (let i = 0; i < 2; i++) teilchen(wuerfel, i ? '#7dff9a' : '#c8ffd4', x + (Math.random() - 0.5) * 0.4, h, y + (Math.random() - 0.5) * 0.4, 0, 1.2, 0, 0.7, 0.09, 0.03, { alpha: 0.9, dreh: 3 });
+  } else if (art === 'glut') {
+    teilchen(kugelG, '#ffb340', x, h + 0.2, y, 0, 0.3, 0, 0.3, 0.2, 1.1 * gr, { alpha: 0.8 });
+    for (let i = 0; i < 8; i++) { const a = Math.random() * 6.3, v = 1 + Math.random() * 1.5; teilchen(kugelG, i % 2 ? '#ff5a1a' : '#ffd34d', x, h + 0.2, y, Math.cos(a) * v, 1 + Math.random(), Math.sin(a) * v, 0.5, 0.12, 0.02, { g: 3 }); }
   } else if (art === 'rauch') {
     teilchen(kugelG, gr < 1 ? '#5e5a55' : '#8f8a84', x + (Math.random() - 0.5) * 0.2, h, y + (Math.random() - 0.5) * 0.2, 0.15 + Math.random() * 0.1, 0.7, 0.05, 1.8, 0.1, 0.45, { alpha: 0.35 });
   }
@@ -661,6 +798,8 @@ function render(sz, dt) {
     g.position.set(e.x + e.gr / 2, 0, e.y + e.gr / 2);
     if (ud.dreh) for (const d of ud.dreh) d.m.rotation[d.achse] += d.v * dt;
     if (ud.flammen) ud.flammen.forEach((f, i) => { const s = 1 + Math.sin(zeit * 13 + i * 2) * 0.15 + Math.sin(zeit * 7.3) * 0.08; f.scale.set(s, s * (1 + Math.sin(zeit * 9 + i) * 0.12), s); });
+    if (ud.wasser) ud.wasser.scale.y = 1 + Math.sin(zeit * 8 + e.x) * 0.12;
+    if (ud.bolzen) ud.bolzen.visible = !(e.feuer != null && e.feuer < 1500);
     if (ud.fahnen) ud.fahnen.forEach(f => { f.rotation.y = Math.sin(zeit * 3 + e.x) * 0.35; });
     if (ud.turm) {
       if (e.winkel != null) { if (en.w == null) en.w = e.winkel; en.w = winkelZu(en.w, e.winkel, Math.min(1, dt * 8)); }
@@ -741,6 +880,8 @@ function render(sz, dt) {
       else if (s.art === 'bombe') { m = new T3.Group(); m.add(new T3.Mesh(geo('SphereGeometry', 0.22, 10, 8), mat('#3b2a1a'))); const f = new T3.Mesh(geo('SphereGeometry', 0.07, 6, 5), mat('#ffcc33', { e: '#ff9900', ei: 2 })); f.position.y = 0.22; m.add(f); }
       else if (s.art === 'wind') m = new T3.Mesh(geo('TorusGeometry', 0.25, 0.05, 6, 16), new T3.MeshBasicMaterial({ color: '#e8f6ff', transparent: true, opacity: 0.8 }));
       else if (s.art === 'feuer') m = new T3.Mesh(geo('IcosahedronGeometry', 0.17, 1), mat('#ff8c1a', { e: '#ff6a00', ei: 2 }));
+      else if (s.art === 'glut') m = new T3.Mesh(geo('IcosahedronGeometry', 0.26, 1), mat('#ff7a1a', { e: '#ff4a00', ei: 2.2 }));
+      else if (s.art === 'bolzen') { m = new T3.Group(); const a = new T3.Mesh(geo('BoxGeometry', 0.08, 0.08, 1.1), mat('#4a3020')); const b = new T3.Mesh(geo('ConeGeometry', 0.1, 0.22, 4), mat('#c0c6cc', METALL)); b.rotation.x = Math.PI / 2; b.position.z = 0.6; m.add(a); m.add(b); }
       else m = new T3.Mesh(geo('DodecahedronGeometry', s.art === 'stein' ? 0.16 : 0.07, 0), mat(s.art === 'stein' ? '#8d8d8d' : '#bbb'));
       m.traverse(o => { if (o.isMesh) o.castShadow = true; });
       en = { m }; szene.add(m); geschossEintraege.set(s.key, en);
@@ -748,8 +889,9 @@ function render(sz, dt) {
     gg.add(s.key);
     const vorher = en.m.position.clone();
     en.m.position.set(s.x, s.h, s.y);
-    if (s.art === 'pfeil' && vorher.distanceToSquared(en.m.position) > 1e-5) en.m.lookAt(vorher.multiplyScalar(-1).add(en.m.position.clone().multiplyScalar(2)));
+    if ((s.art === 'pfeil' || s.art === 'bolzen') && vorher.distanceToSquared(en.m.position) > 1e-5) en.m.lookAt(vorher.multiplyScalar(-1).add(en.m.position.clone().multiplyScalar(2)));
     if (s.art === 'wind') { en.m.rotation.x = zeit * 12; en.m.rotation.y = zeit * 9; }
+    if (s.art === 'glut') teilchen(geo('IcosahedronGeometry', 1, 0), Math.random() < 0.5 ? '#ff7a1a' : '#ffd34d', s.x, s.h, s.y, 0, 0.4, 0, 0.35, 0.16, 0.03, { alpha: 0.9 });
     if (s.art === 'feuer' && Math.random() < 0.5) teilchen(geo('IcosahedronGeometry', 1, 0), '#ffb340', s.x, s.h, s.y, 0, 0.3, 0, 0.25, 0.1, 0.02, { alpha: 0.8 });
   }
   for (const [k, en] of geschossEintraege) if (!gg.has(k)) { entfernen(en.m); geschossEintraege.delete(k); }
