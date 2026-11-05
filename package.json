@@ -1,0 +1,9 @@
+{
+  "name": "taddelvillage",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Taddelvillage – Dorf aufbauen, Truppen ausbilden, Dörfer angreifen. Browser-Strategiespiel der Swimming-Lions-Spielesammlung.",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}

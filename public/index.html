@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Taddelvillage</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2f6b2a">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛖</text></svg>">
+<style>
+  :root {
+    --holz: #6b4423; --holz-hell: #8a5a2e; --papier: #fff6e0; --tinte: #3a2410;
+    --gold: #f2c230; --gruen: #3fae3a; --gruen-d: #2a7f27; --rot: #d9442f; --blau: #2f7bf6;
+    --schatten: 0 3px 0 rgba(0,0,0,.35), 0 8px 18px rgba(0,0,0,.25);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #1f4d1c; color: var(--tinte);
+    font: 600 15px/1.25 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; user-select: none; -webkit-user-select: none; touch-action: none; }
+  canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: none; }
+  button { font: inherit; cursor: pointer; border: 0; }
+  .knopf { background: linear-gradient(#ffd85a, #f0a91e); color: #4a2a00; border-radius: 12px; padding: 10px 14px; min-height: 44px;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,.2), 0 3px 0 #8a5a00; text-shadow: 0 1px 0 rgba(255,255,255,.5); font-weight: 800; }
+  .knopf:active { transform: translateY(2px); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2), 0 1px 0 #8a5a00; }
+  .knopf.gruen { background: linear-gradient(#7ee05a, #3ea52d); color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,.4); box-shadow: inset 0 -3px 0 rgba(0,0,0,.2), 0 3px 0 #1e5f17; }
+  .knopf.rot { background: linear-gradient(#ff7a5c, #d43a22); color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,.4); box-shadow: inset 0 -3px 0 rgba(0,0,0,.2), 0 3px 0 #7d1d0f; }
+  .knopf.blau { background: linear-gradient(#6fb1ff, #2f6fdc); color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,.4); box-shadow: inset 0 -3px 0 rgba(0,0,0,.2), 0 3px 0 #173e86; }
+  .knopf.grau { background: linear-gradient(#ddd, #aaa); color: #555; box-shadow: inset 0 -3px 0 rgba(0,0,0,.15), 0 3px 0 #666; text-shadow: none; }
+  .knopf[disabled] { filter: grayscale(.8) brightness(.9); opacity: .7; }
+
+  /* Rohstoffleiste */
+  #oben { position: fixed; top: calc(env(safe-area-inset-top) + 8px); left: 8px; right: 8px; display: flex; gap: 8px; flex-wrap: wrap;
+    justify-content: space-between; pointer-events: none; z-index: 5; }
+  .gruppe { display: flex; gap: 6px; flex-wrap: wrap; }
+  .rs { pointer-events: auto; position: relative; min-width: 112px; height: 34px; border-radius: 17px; background: rgba(0,0,0,.55);
+    color: #fff; display: flex; align-items: center; padding: 0 10px 0 36px; text-shadow: 0 1px 1px #000; font-weight: 800; overflow: hidden; }
+  .rs .ic { position: absolute; left: 6px; top: 4px; font-size: 22px; line-height: 26px; }
+  .rs .bar { position: absolute; left: 0; bottom: 0; height: 4px; background: var(--gold); transition: width .3s; }
+  .rs.holz .bar { background: #c98b4b; }
+  .rs small { opacity: .7; font-weight: 600; margin-left: 4px; font-size: 11px; }
+
+  #unten { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 10px); display: flex; justify-content: center; gap: 10px;
+    flex-wrap: wrap; padding: 0 8px; z-index: 5; pointer-events: none; }
+  #unten .knopf { pointer-events: auto; min-width: 74px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 10px; font-size: 13px; }
+  #unten .knopf b { font-size: 24px; line-height: 26px; }
+  #angriffKnopf { min-width: 96px !important; }
+
+  /* Info-Leiste zum gewählten Gebäude */
+  #info { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 92px); width: min(560px, calc(100vw - 16px));
+    background: var(--papier); border: 3px solid var(--holz); border-radius: 16px; padding: 10px 12px; box-shadow: var(--schatten); z-index: 6; display: none; }
+  #info.offen { display: block; }
+  #info h3 { margin: 0 0 4px; font-size: 17px; }
+  #info .zeile { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  #info .zeile .knopf { flex: 1 1 120px; font-size: 14px; }
+  #info p { margin: 2px 0; font-weight: 500; font-size: 13px; }
+
+  /* Fenster */
+  .fenster { position: fixed; inset: 0; z-index: 20; background: rgba(10,20,10,.6); display: none; align-items: center; justify-content: center; padding: 12px; }
+  .fenster.offen { display: flex; }
+  .karte { width: min(720px, 100%); max-height: calc(100vh - 24px); overflow: auto; background: var(--papier); border: 4px solid var(--holz);
+    border-radius: 18px; padding: 14px; box-shadow: var(--schatten); position: relative; touch-action: pan-y; }
+  .karte h2 { margin: 0 0 10px; font-size: 22px; padding-right: 44px; }
+  .zu { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 50%; background: var(--rot); color: #fff; font-size: 22px;
+    box-shadow: 0 3px 0 #7d1d0f; }
+  .reiter { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  .reiter button { padding: 8px 12px; border-radius: 10px; background: #e8d5aa; color: var(--tinte); font-weight: 800; min-height: 40px; }
+  .reiter button.an { background: var(--holz); color: #fff; }
+  .raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .ware { background: #fff; border: 2px solid #e2c88f; border-radius: 14px; padding: 8px; text-align: center; position: relative; cursor: pointer; }
+  .ware:active { transform: scale(.97); }
+  .ware.aus { opacity: .5; cursor: default; }
+  .ware .em { font-size: 40px; line-height: 48px; }
+  .ware .n { font-weight: 800; }
+  .ware .k { font-size: 13px; margin-top: 4px; }
+  .ware .z { font-size: 12px; color: #7a5a3a; font-weight: 500; }
+  .ware .anz { position: absolute; top: 6px; right: 8px; font-size: 12px; color: #7a5a3a; }
+  .ware .stat { font-size: 11px; color: #7a5a3a; font-weight: 500; margin-top: 2px; }
+  .zu-teuer { color: var(--rot); }
+  .schlange { display: flex; gap: 6px; flex-wrap: wrap; min-height: 52px; padding: 6px; background: #f1e2bf; border-radius: 12px; margin: 8px 0; align-items: center; }
+  .schlange .t { background: #fff; border-radius: 10px; padding: 2px 6px; font-size: 22px; position: relative; min-width: 44px; text-align: center; }
+  .schlange .t small { position: absolute; right: 2px; bottom: 0; font-size: 11px; font-weight: 800; }
+  .schlange .t .fort { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--gruen); border-radius: 2px; }
+  .hinweis { font-size: 13px; color: #7a5a3a; font-weight: 500; margin: 4px 0; }
+
+  /* Platzieren */
+  #platzLeiste { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 14px); display: none; gap: 10px; z-index: 7;
+    background: rgba(0,0,0,.55); padding: 8px; border-radius: 16px; align-items: center; color: #fff; }
+  #platzLeiste.offen { display: flex; }
+  #platzLeiste span { padding: 0 6px; max-width: 46vw; font-size: 13px; }
+
+  /* Kampf */
+  #kampfOben { position: fixed; top: calc(env(safe-area-inset-top) + 8px); left: 8px; right: 8px; display: none; justify-content: space-between; gap: 8px; z-index: 5;
+    pointer-events: none; color: #fff; text-shadow: 0 1px 2px #000; flex-wrap: wrap; }
+  #kampfOben.offen { display: flex; }
+  .kasten { background: rgba(0,0,0,.55); border-radius: 12px; padding: 6px 10px; pointer-events: auto; }
+  #kZeit { font-size: 22px; font-weight: 900; text-align: center; }
+  #kSterne { font-size: 24px; letter-spacing: 2px; }
+  #kampfUnten { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 8px); display: none; z-index: 5; padding: 0 8px; gap: 8px;
+    align-items: flex-end; justify-content: center; flex-wrap: wrap; pointer-events: none; }
+  #kampfUnten.offen { display: flex; }
+  #truppen { display: flex; gap: 6px; overflow-x: auto; pointer-events: auto; padding: 4px; background: rgba(0,0,0,.45); border-radius: 14px; max-width: 100%; }
+  .tk { width: 62px; height: 72px; flex: none; border-radius: 12px; background: linear-gradient(#fff3d0, #e6c98a); border: 3px solid #8a5a2e; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 30px; }
+  .tk small { font-size: 12px; font-weight: 900; color: #3a2410; position: absolute; top: 2px; left: 5px; }
+  .tk i { font-style: normal; font-size: 10px; position: absolute; bottom: 2px; color: #3a2410; }
+  .tk.an { border-color: #fff; box-shadow: 0 0 0 3px #39f, 0 0 14px #39f; transform: translateY(-4px); }
+  .tk.leer { filter: grayscale(1); opacity: .5; }
+  #kampfKnoepfe { display: flex; gap: 8px; pointer-events: auto; }
+
+  #meldung { position: fixed; left: 50%; top: 22%; transform: translateX(-50%); z-index: 30; background: rgba(0,0,0,.75); color: #fff; padding: 10px 16px;
+    border-radius: 12px; font-weight: 800; pointer-events: none; opacity: 0; transition: opacity .25s; text-align: center; max-width: 90vw; }
+  #meldung.zeigen { opacity: 1; }
+
+  .kampagne { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+  .kampagne button { background: #fff; border: 2px solid #e2c88f; border-radius: 12px; padding: 8px 4px; min-height: 84px; color: var(--tinte); font-weight: 800; }
+  .kampagne button .em { font-size: 26px; display: block; }
+  .kampagne button.zu- { opacity: .45; }
+  .kampagne button small { display: block; font-size: 12px; color: #c48a00; letter-spacing: 1px; }
+  .ergebnis { text-align: center; }
+  .ergebnis .gross { font-size: 54px; letter-spacing: 6px; margin: 4px 0; }
+  .liste { margin: 8px 0; padding-left: 18px; font-weight: 500; }
+  .kleintext { font-size: 12px; color: #7a5a3a; font-weight: 500; }
+</style>
+</head>
+<body>
+<canvas id="welt"></canvas>
+
+<div id="oben">
+  <div class="gruppe">
+    <div class="rs" id="rsGold"><span class="ic">🪙</span><span id="tGold">0</span><small id="tGoldMax"></small><span class="bar" id="bGold"></span></div>
+    <div class="rs holz" id="rsHolz"><span class="ic">🪵</span><span id="tHolz">0</span><small id="tHolzMax"></small><span class="bar" id="bHolz"></span></div>
+  </div>
+  <div class="gruppe">
+    <div class="rs" style="min-width:84px"><span class="ic">🏆</span><span id="tTroph">0</span></div>
+    <div class="rs" style="min-width:84px" title="Freie Baumeister"><span class="ic">👷</span><span id="tBau">1/1</span></div>
+  </div>
+</div>
+
+<div id="unten">
+  <button class="knopf" id="menuKnopf"><b>☰</b>Menü</button>
+  <button class="knopf" id="shopKnopf"><b>🛠️</b>Bauen</button>
+  <button class="knopf" id="armeeKnopf"><b>⚔️</b>Armee</button>
+  <button class="knopf rot" id="angriffKnopf"><b>🗡️</b>Angriff!</button>
+</div>
+
+<div id="info"></div>
+
+<div id="platzLeiste">
+  <button class="knopf rot" id="platzNein">✖</button>
+  <span id="platzText">Ziehen zum Verschieben</span>
+  <button class="knopf gruen" id="platzJa">✔</button>
+</div>
+
+<div id="kampfOben">
+  <div class="kasten">
+    <div id="kName">Räuberdorf</div>
+    <div class="kleintext" style="color:#ffe9a8" id="kBeute">Beute: 🪙 0 · 🪵 0</div>
+    <div class="kleintext" style="color:#ffe9a8" id="kGeholt">Geholt: 🪙 0 · 🪵 0</div>
+  </div>
+  <div class="kasten" style="text-align:center">
+    <div id="kZeit">3:00</div>
+    <div id="kSterne">☆☆☆</div>
+    <div id="kProzent">0 %</div>
+  </div>
+</div>
+<div id="kampfUnten">
+  <div id="truppen"></div>
+  <div id="kampfKnoepfe">
+    <button class="knopf blau" id="weiterKnopf">🔍 Weiter</button>
+    <button class="knopf rot" id="beendenKnopf">🏳️ Ende</button>
+  </div>
+</div>
+
+<div class="fenster" id="fShop"><div class="karte">
+  <button class="zu" data-zu>✕</button>
+  <h2>🛠️ Bauen</h2>
+  <div class="reiter" id="shopReiter"></div>
+  <div class="raster" id="shopRaster"></div>
+</div></div>
+
+<div class="fenster" id="fArmee"><div class="karte">
+  <button class="zu" data-zu>✕</button>
+  <h2>⚔️ Armee</h2>
+  <div class="hinweis" id="armeeInfo"></div>
+  <div class="schlange" id="armeeJetzt"></div>
+  <div class="hinweis">In Ausbildung (antippen zum Abbrechen):</div>
+  <div class="schlange" id="armeeSchlange"></div>
+  <div class="raster" id="armeeRaster"></div>
+</div></div>
+
+<div class="fenster" id="fAngriff"><div class="karte">
+  <button class="zu" data-zu>✕</button>
+  <h2>🗡️ Angreifen</h2>
+  <div class="reiter" id="angriffReiter"></div>
+  <div id="angriffInhalt"></div>
+</div></div>
+
+<div class="fenster" id="fErgebnis"><div class="karte ergebnis" id="ergebnisInhalt"></div></div>
+
+<div class="fenster" id="fMenu"><div class="karte">
+  <button class="zu" data-zu>✕</button>
+  <h2>☰ Menü</h2>
+  <div id="menuInhalt"></div>
+</div></div>
+
+<div class="fenster" id="fFrage"><div class="karte" style="width:min(380px,100%)">
+  <h2 id="frageTitel"></h2>
+  <p id="frageText" style="font-weight:500"></p>
+  <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+    <button class="knopf grau" id="frageNein">Abbrechen</button>
+    <button class="knopf gruen" id="frageJa">OK</button>
+  </div>
+</div></div>
+
+<div id="meldung"></div>
+
+<script src="spiel.js"></script>
+<script src="https://rangliste-aoee.onrender.com/melder.js" data-spiel="Taddelvillage" data-speicher="tv_" defer></script>
+<script src="goodnotes.js"></script>
+</body>
+</html>
